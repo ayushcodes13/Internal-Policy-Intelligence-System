@@ -106,3 +106,7 @@ These issues are included to test retrieval quality, ranking logic, and refusal 
 - When evidence is insufficient, conflicting, or outdated, the system must refuse to answer.
 
 This document defines the boundaries of what the system is allowed to trust.
+
+
+
+#### shift + command + V --> for preview
