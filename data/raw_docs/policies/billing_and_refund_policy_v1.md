@@ -1,5 +1,5 @@
-source_type: policy
-owner: finance
+source_type: policy <br>
+owner: finance <br>
 last_updated: 2021-09
 
 # Billing and Refund Policy (v1)
