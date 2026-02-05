@@ -1,6 +1,6 @@
-source_type: policy
-owner: ops
-last_updated: 2023-08
+### source_type: policy
+### owner: ops
+### last_updated: 2023-08
 
 # Account Termination and Deletion Policy
 
