@@ -1,0 +1,10 @@
+source_type: note <br>
+owner: finance <br>
+last_updated: 2023-03
+
+Internal refund exception memo.
+
+- Refunds approved beyond policy window for enterprise contracts on escalation.
+- Trial refunds approved even after service usage in rare cases.
+- Government-linked accounts handled manually.
+- Do not cite these cases as precedent in customer communication.
