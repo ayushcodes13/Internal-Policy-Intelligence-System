@@ -1,0 +1,10 @@
+source_type: note <br>
+owner: ops <br>
+last_updated: 2023-06
+
+Operational notes for internal use.
+
+- SLA clocks are paused if customer does not respond within 24 hours.
+- Weekend incidents are often handled Monday unless marked P1.
+- Account closures requested via email are slower than dashboard requests.
+- Refund approvals above INR 50,000 require ops lead confirmation.
