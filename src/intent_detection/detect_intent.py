@@ -18,3 +18,25 @@ What it does NOT do:
 Think of it as: Labeling the question, not solving it.
 """
 
+def detect_intent(user_text: str) -> dict:
+    """
+    Detects the intent of a user question.
+
+    Input:
+        user_text (str): The user's question
+
+    Output:
+        dict: Detected intents with confidence
+    """
+
+    # TEMPORARY: hardcoded intent detection
+    # We will replace this with real logic later
+
+    return {
+        "intents": [
+            {
+                "name": "refund_query",
+                "confidence": 0.80
+            }
+        ]
+    }
