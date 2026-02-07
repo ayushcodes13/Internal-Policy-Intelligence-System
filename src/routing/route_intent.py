@@ -49,10 +49,16 @@ def route_intent(intents: list) -> dict:
 	}
 
 if __name__ == "__main__":
-    test_intents = [
+    test_intents_1= [
         {"name": "account_closure", "confidence": 0.82},
         {"name": "refund_query", "confidence": 0.67},
     ]
 
-    result = route_intent(test_intents)
+    result = route_intent(test_intents_1)
     print(result)
+    
+test_intents_2 = [
+        {"name": "random_gibberish", "confidence": 0.99}
+	]
+result = route_intent(test_intents_2)
+print(result)
