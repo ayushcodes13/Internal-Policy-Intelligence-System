@@ -2,21 +2,23 @@
 
 ## Purpose
 
-Routing determines **which document groups are eligible for retrieval**
+Routing determines **which organizational owners are allowed to provide information**
 after intent detection.
 
 Routing does NOT:
-- detect intent
-- understand the question
-- apply rules or policies
+- detect or classify intent
+- understand user questions
+- interpret meaning
+- apply business rules or policies
 - resolve conflicts
-- choose answers
+- decide correctness
+- generate answers
 
 Routing ONLY maps:
 
-**intent → allowed document categories**
+**intent → allowed document owners**
 
-This keeps routing simple, stable, and low-risk.
+This keeps routing stable, auditable, and resistant to document churn.
 
 ---
 
@@ -24,7 +26,7 @@ This keeps routing simple, stable, and low-risk.
 
 Routing receives:
 - One or more detected intents
-- Each intent has a confidence score
+- Each intent includes a confidence score
 
 Example:
 ```yaml
@@ -32,42 +34,65 @@ intent: account_closure
 confidence: 0.82
 ```
 
+Routing does not validate confidence.
+It assumes intent detection has already done its job.
+
 ---
 
 ## Output
 
 Routing produces:
-- A list of allowed document groups
+- A list of allowed document owners
 - Nothing else
 
 Example:
-
-```yaml
-allowed_sources:
-  - policies
-  - faqs
 ```
+allowed_owners:
+  - ops
+  - support
+```
+
+Routing does not rank, filter, or inspect documents.
 
 ---
 
-## Core Rules
+## Core Principles
 
-1. **Allow-list only**
-   - Only explicitly allowed document groups are retrievable
-   - Everything else is excluded by default
+### 1. Allow-list only
 
-2. **No file-level routing**
-   - Routing never names individual files
-   - Routing works only at document-group level
+- Only explicitly allowed owners are eligible for retrieval
+- All other owners are excluded by default
 
-3. **No conditional logic**
-   - Routing does not inspect question wording
-   - Routing does not reason about edge cases
-   - Routing does not handle conflicts
+### 2. Owner-based routing only
 
-4. **Notes are always excluded**
-   - notes/ are never routed
-   - Notes exist only for humans and future rules
+- Routing never names folders
+- Routing never names files
+- Routing never depends on document structure
+
+Owners represent who owns the truth, not how files are organized.
+
+### 3. No conditional logic
+
+- Routing does not inspect question wording
+- Routing does not infer edge cases
+- Routing does not apply exceptions
+
+### 4. Notes are always excluded
+
+- notes/ are never routed
+- Notes exist only for human context and future rule design
+- Notes are never surfaced to retrieval
+
+---
+
+## Ownership Model
+
+All documents must declare an owner in metadata:
+```
+owner: finance | security | ops | support
+```
+
+Routing operates only on this field.
 
 ---
 
@@ -75,106 +100,113 @@ allowed_sources:
 
 ### Intent: access_request
 
-Allowed document groups:
-- policies
-- sops
-- faqs
+**Allowed owners:**
+- ops
+- security
+- support
 
-Excluded:
+**Excluded:**
+- finance
 - notes
 
 ---
 
 ### Intent: account_closure
 
-Allowed document groups:
-- policies
-- faqs
+**Allowed owners:**
+- ops
+- support
 
-Excluded:
-- sops
+**Excluded:**
+- finance
+- security
 - notes
 
 ---
 
 ### Intent: refund_query
 
-Allowed document groups:
-- policies
-- sops
-- faqs
+**Allowed owners:**
+- finance
+- support
 
-Excluded:
+**Excluded:**
+- security
+- ops
 - notes
 
 ---
 
 ### Intent: billing_query
 
-Allowed document groups:
-- policies
-- faqs
+**Allowed owners:**
+- finance
 
-Excluded:
-- sops
+**Excluded:**
+- ops
+- security
+- support
 - notes
 
 ---
 
 ### Intent: security_policy_query
 
-Allowed document groups:
-- policies
-- faqs
+**Allowed owners:**
+- security
 
-Excluded:
-- sops
+**Excluded:**
+- finance
+- ops
+- support
 - notes
 
 ---
 
 ### Intent: support_process_query
 
-Allowed document groups:
-- sops
-- faqs
+**Allowed owners:**
+- support
+- ops
 
-Excluded:
-- policies
+**Excluded:**
+- finance
+- security
 - notes
 
 ---
 
-## Multiple Intents
+## Multiple Intents Handling
 
 If multiple intents are detected:
-- Allowed document groups are merged
+- Allowed owners are merged (set union)
 - notes remain excluded in all cases
 
 Example:
-
-```yaml
+```
 intents:
   - refund_query
   - billing_query
 
-allowed_sources:
-  - policies
-  - sops
-  - faqs
+allowed_owners:
+  - finance
+  - support
 ```
+
+Routing does not resolve conflicts between owners.
+That responsibility belongs to later layers.
 
 ---
 
 ## Out of Scope
 
-Routing does NOT handle:
-- document conflicts
-- outdated content
-- compliance logic
-- escalation
-- refusal
-- answer generation
+Routing explicitly does NOT handle:
+- conflicting documents
+- outdated policies
+- compliance enforcement
+- escalation logic
+- refusal logic
+- hallucination control
 
 These belong to:
 - rules layer
@@ -183,20 +215,33 @@ These belong to:
 
 ---
 
-## Design Principle
+## Design Rationale
 
-Routing is intentionally simple.
+Routing is intentionally boring.
 
-Simple routing:
+Boring routing:
 - breaks less
-- scales better
-- is easy to audit
 - survives document growth
+- avoids silent bugs
+- scales across teams
+- remains auditable months later
 
 All intelligence lives:
 - before routing → intent detection
 - after retrieval → rules and response logic
 
-Routing is just the bridge.
+Routing is the stable bridge in between.
 
+---
 
+## What to do next (no rushing)
+
+1. Update your metadata to ensure every doc has `owner`
+2. Adjust `route_intent.py` to output `allowed_owners`
+3. Let retrieval filter by owner metadata
+
+No rules yet.
+No cleverness yet.
+Just clean plumbing.
+
+You're building this the right way.
