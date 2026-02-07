@@ -1,0 +1,7 @@
+- access request to account
+- account closing request
+- any refund available?
+- billing methods available and auto billing and auto renewal
+- how to avoid account termination
+- access denied to a perticular, how to request access
+- what are the security policies
