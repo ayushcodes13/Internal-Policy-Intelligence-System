@@ -15,5 +15,7 @@ Later this file will grow:
 	•	refusals
 	•	final answer generation
 
-But not yet.
+It does not think, not decide, not store knowledge.
+
+It only connects the parts in the correct order.
 """
