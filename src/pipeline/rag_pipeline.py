@@ -1,9 +1,7 @@
 """
-Job:
-Wire everything together in order.
+Job: Wire everything together in order.
 
 Rough flow:
-
 question
 → detect_intent
 → route_intent
@@ -16,6 +14,5 @@ Later this file will grow:
 	•	final answer generation
 
 It does not think, not decide, not store knowledge.
-
 It only connects the parts in the correct order.
 """
