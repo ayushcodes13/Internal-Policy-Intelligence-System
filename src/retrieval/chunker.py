@@ -73,7 +73,7 @@ def chunk_documents(
     chunked_docs = []
 
     for doc in documents:
-        text = doc["content"]
+        text = doc["text"]
         metadata = doc["metadata"]
         path = metadata.get("path", "unknown")
 

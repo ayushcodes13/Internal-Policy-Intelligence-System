@@ -48,6 +48,17 @@ def embed_chunks(chunks: List[Dict]) -> List[Dict]:
 
     return embedded_chunks
 
+def embed_query(question: str) -> List[float]:
+    """
+    Embed a single user query into a vector.
+    """
+    vector = model.encode(
+        question,
+        convert_to_numpy=True,
+        normalize_embeddings=True
+    )
+    return vector.tolist()
+
 if __name__ == "__main__":
     test_chunks = [
         {

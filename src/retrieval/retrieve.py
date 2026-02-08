@@ -17,8 +17,8 @@ This is where:
 """
 from typing import List, Dict
 import numpy as np
-
-from retrieval.embedder import embed_text
+from .embedder import embed_query
+from .embedder import embed_chunks
 
 
 def cosine_similarity(vec1: np.ndarray, vec2: np.ndarray) -> float:
@@ -42,7 +42,7 @@ def retrieve_chunks(
         question: user query
         chunks: list of chunk dicts
                 {
-                "text": str,
+                "content": str,
                 "embedding": np.ndarray,
                 "metadata": {
                     "owner": str,
@@ -67,8 +67,8 @@ def retrieve_chunks(
         return []
 
     # 2️⃣ Embed the question
-    question_vector = embed_text(question)
-
+    question_vector = embed_query(question)
+    
     # 3️⃣ Similarity computation
     scored_chunks = []
     for chunk in filtered_chunks:
@@ -83,3 +83,28 @@ def retrieve_chunks(
     scored_chunks.sort(key=lambda x: x["score"], reverse=True)
 
     return scored_chunks[:top_k]
+
+if __name__ == "__main__":
+    from src.utils.loaders import load_markdown_files as load_documents
+    from src.retrieval.chunker import chunk_documents
+    from src.retrieval.embedder import embed_chunks
+
+    docs = load_documents(base_path="data/raw_docs")
+
+    print("SAMPLE DOC:")
+    print(docs[0])
+    print(type(docs[0]))
+    
+    chunks = chunk_documents(docs)
+    chunks = embed_chunks(chunks)
+
+    results = retrieve_chunks(
+        question="How can I close my account and get a refund?",
+        chunks=chunks,
+        allowed_owners=["finance"],
+        top_k=3
+    )
+
+    for r in results:
+        print(r["score"], r["metadata"]["path"])
+        
