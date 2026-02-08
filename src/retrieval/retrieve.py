@@ -16,61 +16,70 @@ This is where:
 
 """
 from typing import List, Dict
-import math
+import numpy as np
+
+from retrieval.embedder import embed_text
 
 
-def cosine_similarity(vec1: List[float], vec2: List[float]) -> float:
-    """
-    Compute cosine similarity between two vectors.
-    Output range: [-1, 1]
-    """
-
-    dot_product = sum(a * b for a, b in zip(vec1, vec2))
-
-    norm_vec1 = math.sqrt(sum(a * a for a in vec1))
-    norm_vec2 = math.sqrt(sum(b * b for b in vec2))
-
-    if norm_vec1 == 0 or norm_vec2 == 0:
+def cosine_similarity(vec1: np.ndarray, vec2: np.ndarray) -> float:
+    """Compute cosine similarity between two vectors."""
+    if np.linalg.norm(vec1) == 0 or np.linalg.norm(vec2) == 0:
         return 0.0
+    return float(np.dot(vec1, vec2) / (np.linalg.norm(vec1) * np.linalg.norm(vec2)))
 
-    return dot_product / (norm_vec1 * norm_vec2)
 
-
-def retrieve_top_k(
-    query_embedding: List[float],
-    documents: List[Dict],
+def retrieve_chunks(
+    question: str,
+    chunks: List[Dict],
     allowed_owners: List[str],
-    k: int = 5
+    top_k: int = 5
 ) -> List[Dict]:
     """
-    Retrieve top-k most relevant document chunks.
+    Retrieve top-k relevant chunks based on semantic similarity,
+    after enforcing routing constraints.
 
     Inputs:
-    - query_embedding: embedding of user query
-    - documents: list of chunks with embeddings + metadata
-    - allowed_owners: owners allowed by routing (finance, security, ops)
-    - k: number of chunks to return
+        question: user query
+        chunks: list of chunk dicts
+                {
+                "text": str,
+                "embedding": np.ndarray,
+                "metadata": {
+                    "owner": str,
+                    "source_type": str,
+                    "path": str
+                }
+                }
+        allowed_owners: owners permitted by routing
+        top_k: number of chunks to return
 
     Output:
-    - list of top-k document chunks with similarity score
+        List of chunks sorted by relevance score
     """
 
+    # 1️⃣ Metadata filtering (ENFORCEMENT)
+    filtered_chunks = [
+        chunk for chunk in chunks
+        if chunk["metadata"].get("owner") in allowed_owners
+    ]
+
+    if not filtered_chunks:
+        return []
+
+    # 2️⃣ Embed the question
+    question_vector = embed_text(question)
+
+    # 3️⃣ Similarity computation
     scored_chunks = []
-
-    for doc in documents:
-        owner = doc["metadata"].get("owner")
-
-        if owner not in allowed_owners:
-            continue
-
-        similarity = cosine_similarity(query_embedding, doc["embedding"])
-
+    for chunk in filtered_chunks:
+        score = cosine_similarity(question_vector, chunk["embedding"])
         scored_chunks.append({
-            "text": doc["text"],
-            "metadata": doc["metadata"],
-            "score": similarity
+            "text": chunk["text"],
+            "metadata": chunk["metadata"],
+            "score": score
         })
 
+    # 4️⃣ Top-K selection
     scored_chunks.sort(key=lambda x: x["score"], reverse=True)
 
-    return scored_chunks[:k]
+    return scored_chunks[:top_k]
