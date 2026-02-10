@@ -211,16 +211,3 @@ You know which question was answered wrongly.
 
 **The answer is:**
 "Because systems fail at boundaries, not functions."
-
-You're building boundaries.
-
----
-
-## Next Step
-
-Next step should be hands-on, otherwise this stays abstract.
-
-Say:
-"Let's implement chunker + loader first."
-
-That's the safest place to start coding without breaking your mental model.
