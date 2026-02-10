@@ -55,11 +55,9 @@ def apply_constraint_rules(
         owner = metadata.get("owner")
         source_type = metadata.get("source_type")
 
-        # 1️⃣ Owner constraint (MANDATORY)
         if owner not in allowed_owners:
             continue
 
-        # 2️⃣ Source type constraint (OPTIONAL)
         if allowed_source_types is not None:
             if source_type not in allowed_source_types:
                 continue
