@@ -4,17 +4,23 @@ Constraint rules
 Question:
 “Is there anything in the retrieved context that must NOT be used?”
 
-This is about documents, not users.
+This layer operates on documents, not users and not meaning.
 
-Examples:
-	•	internal notes accidentally retrieved
-	•	outdated policy version
-	•	wrong owner (finance doc leaking into security answer)
+Handles:
+	•	removal of forbidden document types
+	•	enforcement of ownership boundaries
+	•	prevention of internal or draft leakage
 
 Outcome:
-Cleaned context (some chunks removed).
+A cleaned context with unsafe or disallowed chunks removed.
 
-Never stops the system. Never escalates. Never refuses.
+Constraint rules:
+	•	never stop execution
+	•	never escalate
+	•	never refuse
+	•	never interpret policy meaning
+
+They exist purely to prevent unsafe context from entering reasoning.
 """
 
 from typing import List, Dict
