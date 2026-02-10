@@ -17,10 +17,7 @@ Cleaned context (some chunks removed).
 Never stops the system. Never escalates. Never refuses.
 """
 
-# src/rules/constraint_rules.py
-
 from typing import List, Dict
-
 
 def apply_constraint_rules(
     chunks: List[Dict],
