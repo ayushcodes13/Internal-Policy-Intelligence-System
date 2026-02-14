@@ -1,4 +1,4 @@
-# Internal Operations Knowledge System (Applied GenAI)
+# Enterprise SaaS Internal Compliance & IT Operations Knowledge System
 
 This project implements a production-style internal knowledge system designed to answer employee operational and policy questions using grounded retrieval over messy enterprise documents.
 
