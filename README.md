@@ -1,4 +1,4 @@
-# Internal Support Operations Knowledge System
+# Enterprise SaaS Internal Compliance & IT Operations Knowledge System
 
 **Governed Retrieval-Augmented Generation (RAG) Pipeline**
 
