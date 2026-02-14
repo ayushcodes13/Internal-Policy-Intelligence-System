@@ -1,6 +1,6 @@
 # Enterprise SaaS Internal Compliance & IT Operations Knowledge System
 
-This project implements a production-style internal knowledge system designed to answer employee operational and policy questions using grounded retrieval over messy enterprise documents.
+This project implements a governed RAG system for enterprise SaaS internal compliance & IT operations support with a production-style internal knowledge system designed to answer employee operational and policy questions using grounded retrieval over messy enterprise documents.
 
 The system prioritizes **correctness, traceability, and refusal over coverage**, and is explicitly designed to handle outdated documents, conflicting sources, and incomplete information.
 
