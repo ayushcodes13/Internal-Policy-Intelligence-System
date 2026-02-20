@@ -1,37 +1,76 @@
 # Rules System Overview
 
 ## Purpose
-The rules layer evaluates retrieved content and decides whether the system
-is allowed to respond, must escalate, or must refuse.
 
-Rules do not retrieve documents.
-Rules do not generate answers.
+The Rules System ensures that retrieval results are safe, authoritative, and compliant before generation.
 
-They only judge.
+It operates after Retrieval and before Generation.
 
-## When This Runs
-Rules execute **after retrieval** and **before generation**.
+---
 
-## Inputs
-- Retrieved document chunks
-- Chunk metadata
-- Detected intents
-- Routing scope
+## Rule Execution Order
 
-## Decisions This Layer Can Make
-- ALLOW
-- ALLOW_WITH_DISCLAIMER
-- ESCALATE
-- REFUSE
-- INSUFFICIENT_CONTEXT
+1. Constraint Rules
+2. Governance Decision
+3. Escalation or Refusal (if required)
+4. SAFE → Proceed to Generation
 
-## Rule Categories
-- Constraint rules: hard boundaries
-- Escalation rules: human handoff
-- Refusal rules: absolute denial
+This order must not change.
 
-## Out of Scope
-- Intent detection
-- Routing
-- Similarity scoring
-- Answer phrasing
+---
+
+## Responsibilities by Layer
+
+### Constraint Rules
+- Clean retrieved context
+- Remove internal or outdated documents
+- Enforce version dominance
+- Ensure authoritative sources
+
+Output:
+- cleaned_chunks
+
+---
+
+### Governance Rules
+- Classify risk level
+- Determine system authority
+- Return one of:
+  - SAFE
+  - ESCALATE
+  - REFUSE_INVALID
+  - REFUSE_POLICY
+
+Output:
+- verdict
+
+---
+
+### Escalation
+- Triggered by governance
+- Forwards case to human review
+- Stops automated generation
+
+---
+
+### Refusal
+- Triggered by governance
+- Returns controlled denial response
+- Ends pipeline
+
+---
+
+## Design Philosophy
+
+The rules system protects:
+
+- document integrity (Constraint)
+- organizational authority (Governance)
+- operational safety (Escalation)
+- policy enforcement (Refusal)
+
+Separation of concerns is intentional.
+
+Each layer has exactly one responsibility.
+
+No layer overlaps with another.
