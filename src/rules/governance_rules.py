@@ -1,3 +1,28 @@
+"""
+Governance Layer
+
+Question:
+“What should the system do with this query?”
+
+This layer:
+- Uses an LLM to detect high-level risk signals
+- Classifies the query into structured governance signals
+- Applies deterministic priority rules
+- Returns a final GovernanceVerdict enum
+
+It does NOT:
+- Escalate
+- Refuse directly
+- Generate answers
+- Modify retrieved documents
+
+It only decides the verdict.
+
+Signal Detection → Deterministic Resolution → Verdict
+
+This keeps decision logic separate from action logic.
+"""
+
 import os
 import json
 from typing import List, Dict
