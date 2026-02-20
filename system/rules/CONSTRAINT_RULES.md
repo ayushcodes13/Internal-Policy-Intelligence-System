@@ -2,104 +2,94 @@
 
 ## Purpose
 
-Constraint rules decide **whether a retrieved chunk is allowed to be used at all**.
+Constraint rules clean the retrieved context.
 
-They operate on **document properties**, not meaning.
+They operate immediately after retrieval and before governance.
 
-They are purely defensive.
+This layer is about **documents**, not users and not decisions.
 
 ---
 
 ## Core Question
 
-“Is there anything in the retrieved context that must NOT be used?”
-
-This is about **documents**, not users.
+“Given what was retrieved, which chunks are allowed to remain in context?”
 
 ---
 
-## What Constraint Rules Do
+## Scope
 
 Constraint rules:
-- remove forbidden document types
-- enforce visibility boundaries
-- enforce ownership boundaries
-- enforce explicit allow/deny flags
 
-They **delete chunks** that should never reach reasoning.
-
----
-
-## What Constraint Rules Do NOT Do
+- remove internal-only documents (notes, drafts, memos)
+- enforce owner boundaries
+- enforce allowed source types
+- resolve version dominance (newer version replaces older)
+- remove duplicate or redundant chunks
 
 Constraint rules do NOT:
+
+- escalate cases
+- refuse user requests
 - interpret policy meaning
-- resolve policy conflicts
-- decide which policy is correct
-- explain outcomes
-- stop the system
-- escalate to humans
-- refuse to answer
-
-If a human needs to *think*, it is not a constraint.
-
----
-
-## Examples
-
-### Example 1: Internal Leakage
-
-Retrieved:
-- refund_policy_v2 (policy, finance)
-- refund_policy_v1 (policy, finance)
-- internal_refund_exceptions_memo (notes)
-
-Constraint action:
-- remove `notes`
-
-Output:
-- refund_policy_v2
-- refund_policy_v1
-
----
-
-### Example 2: Owner Mismatch
-
-User intent:
-- security_policy_query
-
-Retrieved:
-- security_policy (security)
-- billing_policy (finance)
-
-Constraint action:
-- remove non-security documents
-
-Output:
-- security_policy
-
----
-
-## Output
-
-Constraint rules return:
-- a **cleaned list of chunks**
-
-They never:
-- halt execution
-- raise decisions
+- decide whether the user is allowed something
 - generate explanations
 
 They only clean the context.
 
 ---
 
+## Inputs
+
+- retrieved_chunks (List[Dict])
+- metadata fields (owner, source_type, last_updated, path)
+
+---
+
+## Outputs
+
+- cleaned_chunks (List[Dict])
+
+This layer never stops the pipeline.
+
+It never returns a verdict.
+
+It only returns a filtered list of chunks.
+
+---
+
+## Version Dominance Rule
+
+If multiple versions of the same policy exist:
+
+- Keep the most recent version.
+- Remove outdated versions.
+
+Version comparison is based on:
+- `last_updated`
+- explicit version tags (e.g., v2 > v1)
+
+---
+
+## Internal Document Removal
+
+The following must always be removed:
+
+- source_type: notes
+- drafts
+- internal memos
+- experimental documents
+
+Even if retrieval returns them.
+
+---
+
 ## Design Principle
 
-Constraint rules are:
-- strict
-- boring
-- deterministic
-- meaning-blind
+Constraint rules protect the system from bad context.
 
-They exist to **prevent damage**, not to make decisions.
+They ensure that only authoritative, allowed documents move forward.
+
+They do not judge the user.
+They do not judge the request.
+
+They clean the environment for governance.
