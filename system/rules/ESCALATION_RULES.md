@@ -1,160 +1,67 @@
-# ESCALATION_RULES.md
+# Escalation Rules
 
 ## Purpose
 
-Escalation rules decide **whether a user query should be handled automatically or routed to a human agent**.
+Escalation rules define when a query must be forwarded to human review.
 
-Escalation does NOT:
-- block the user
-- refuse to answer
-- generate explanations
-- modify documents
+Escalation is triggered by Governance.
 
-Escalation ONLY answers one question:
+It is not a filtering layer.
+It is not document cleaning.
+It is not answer generation.
 
-**"Is it safe and appropriate to answer this automatically?"**
+It is a control mechanism.
 
 ---
 
-## Position in Pipeline
+## Core Question
 
-Escalation rules run **after constraint rules** and **before refusal rules**.
-
-Fixed execution order:
-1. Constraint rules
-2. Escalation rules
-3. Refusal rules
-4. Final verdict
-
-This order must not be changed.
+“Is this case too sensitive or risky for automated handling?”
 
 ---
 
-## Inputs
+## When Escalation Is Triggered
 
-Escalation rules receive:
-- Detected intents with confidence scores
-- Cleaned retrieved chunks (after constraints)
-- Routing scope (document owners / domains)
+Escalation may be required if the query involves:
 
-Example input:
-```json
-{
-  "intents": [
-    { "name": "refund_query", "confidence": 0.78 },
-    { "name": "account_termination", "confidence": 0.74 }
-  ],
-  "chunks": [...],
-  "allowed_owners": ["finance"]
-}
-```
+- fraud or abuse allegations
+- legal threats or litigation
+- regulatory or compliance investigations
+- policy override requests
+- disputes involving financial loss
+- unusual or high-risk operational impact
+
+These signals may be detected from:
+- user query content
+- contextual metadata
+- retrieved policy indicators
 
 ---
 
-## Outputs
+## What Happens During Escalation
 
-Escalation rules return one of two outcomes:
+If escalation is triggered:
 
-* ALLOW_AUTOMATION
-* ESCALATE_TO_HUMAN
-
-No partial states.
-No explanations.
-No user-facing text.
+- The system must NOT generate a final answer.
+- The query and cleaned context are packaged.
+- The case is forwarded to human review.
+- The pipeline stops at this stage.
 
 ---
 
-## Escalation Triggers
+## Output
 
-### Rule 1: Low Intent Confidence
+Escalation does not produce text.
 
-If any detected intent has confidence below the safe threshold:
-
-```
-confidence < 0.60
-```
-
-→ Escalate
-
-Reason:
-Low confidence increases the risk of misunderstanding the user's intent.
+It produces a system action:
+- ESCALATE
 
 ---
 
-### Rule 2: Conflicting or High-Risk Intent Combinations
+## Design Principle
 
-If the query involves multiple intents whose combination implies dispute, denial, or policy enforcement, escalate.
+Escalation protects against high-risk automation.
 
-Examples:
+The AI system must not make irreversible or legally sensitive decisions.
 
-* refund_query + account_termination
-* billing_query + policy_violation
-* access_request + security_policy_query
-
-Reason:
-These scenarios often require judgment, exception handling, or legal review.
-
----
-
-### Rule 3: Security-Sensitive Domains
-
-If the query involves intents related to:
-
-* security policies
-* account access removal
-* incident response
-* data access restrictions
-
-→ Escalate
-
-Reason:
-Security-related queries carry higher risk and should not be fully automated.
-
----
-
-### Rule 4: Ambiguous Ownership Scope
-
-If routing results in multiple owners (e.g., finance + security + ops) for a single query:
-
-→ Escalate
-
-Reason:
-Cross-domain responses increase the chance of incorrect or misleading answers.
-
----
-
-## Explicit Non-Triggers
-
-Escalation rules do NOT trigger on:
-
-* Simple FAQs
-* Single-intent queries with high confidence
-* Clear policy explanations
-* Standard procedural questions
-
-Escalation is not a fallback for weak answers.
-It is a guardrail for risk.
-
----
-
-## Relationship to Other Rules
-
-* Constraint rules clean the input context
-* Escalation rules assess response risk
-* Refusal rules decide if the system must decline entirely
-
-Escalation does not override refusal.
-Refusal always has final authority.
-
----
-
-## Design Principles
-
-* Conservative by default
-* Deterministic and auditable
-* No LLM reasoning
-* No hidden heuristics
-* Easy to extend with new triggers
-
-Escalation rules protect the system from answering when being wrong is costly, not when the answer is unknown.
-
+Escalation ensures human authority is preserved.
