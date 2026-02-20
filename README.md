@@ -1,179 +1,224 @@
-# Internal Operations Knowledge System (Applied GenAI)
+# Enterprise SaaS Internal Compliance & IT Operations Knowledge System
 
-This project implements a production-style internal knowledge system designed to answer employee operational and policy questions using grounded retrieval over messy enterprise documents.
-
-The system prioritizes **correctness, traceability, and refusal over coverage**, and is explicitly designed to handle outdated documents, conflicting sources, and incomplete information.
-
-This is not a chatbot demo. It is a reliability-focused GenAI system.
+**Governed Retrieval-Augmented Generation (RAG) Pipeline**
 
 ---
 
-## Problem Statement
+## Overview
 
-In real companies, internal knowledge is fragmented across policies, SOPs, FAQs, and informal notes. Documents often:
+This project implements a governed Retrieval-Augmented Generation (RAG) system designed for internal enterprise support operations.
 
-- Contradict each other
-- Become outdated without clear deprecation
-- Lack ownership or versioning
-- Are interpreted informally by employees
+The system simulates a production-grade internal knowledge assistant capable of:
 
-Naïve LLM-based systems hallucinate confidently in these conditions, creating operational and compliance risk.
+- Handling policy and SOP-based queries
+- Enforcing document-level governance
+- Preventing cross-domain leakage
+- Applying structured rule layers before generation
 
-This project addresses that problem by enforcing **grounded answering, authority-aware retrieval, and explicit refusal logic**.
-
----
-
-## System Scope
-
-The system is designed to answer **internal operational and policy-related questions** for a B2B SaaS company.
-
-It is explicitly **not allowed** to:
-- Make decisions on behalf of humans
-- Interpret intent or provide advice
-- Guess or infer beyond documented evidence
-
-If reliable evidence is unavailable or conflicting, the system must refuse to answer.
+Unlike generic chatbot implementations, this system emphasizes **controlled retrieval**, **rule enforcement**, and **explainable decision layers**.
 
 ---
 
-## Key Guarantees
+## System Architecture
 
-- Answers are grounded only in retrieved internal documents
-- Sources are cited with every answer
-- Conflicting or outdated evidence triggers refusal
-- Every query is logged for audit and debugging
-- Failure modes are explicit and inspectable
+```
+User Query
+    ↓
+Intent Detection
+    ↓
+Routing (Owner-Based Scope)
+    ↓
+Retrieval (Dense Similarity Search)
+    ↓
+Constraint Cleaning
+    ↓
+Governance Verdict
+    ↓
+Generation (Placeholder)
+```
 
----
+Each stage is intentionally separated to ensure:
 
-## Document Universe
-
-The system operates over a simulated internal document set representing a mid-sized B2B SaaS company.
-
-### Document Types and Authority
-
-1. **Policies (High Authority)**  
-   Define company rules and constraints.
-
-2. **SOPs (Medium Authority)**  
-   Describe how teams execute processes.
-
-3. **FAQs (Low Authority)**  
-   Interpretive, simplified guidance.
-
-4. **Notes / Memos (Very Low Authority)**  
-   Informal, incomplete, or outdated information.
-
-Authority hierarchy is strictly enforced. Conflicts between documents at the same authority level trigger refusal.
-
-Detailed documentation is available in `DOCUMENT_UNIVERSE.md`.
+- **Auditability** – Every decision is traceable
+- **Replaceability** – Components can be swapped independently
+- **Production extensibility** – Easy to add new features
+- **Controlled context usage** – No unfiltered content reaches generation
 
 ---
 
-## High-Level Architecture
+## Core Design Principles
 
-1. **Ingestion**
-   - Loads documents from multiple formats
-   - Extracts metadata (source type, owner, last updated)
-   - Chunks content for retrieval
+### 1. Separation of Concerns
 
-2. **Retrieval**
-   - Embedding-based semantic search
-   - Returns top-k candidate chunks
+Each component performs exactly one job:
 
-3. **Ranking and Filtering**
-   - Authority-aware re-ranking
-   - Filters outdated or low-confidence documents
+- **Intent detection** labels the query
+- **Routing** determines allowed document owners
+- **Retrieval** selects relevant chunks
+- **Constraint rules** clean unsafe or outdated content
+- **Governance rules** decide escalation or refusal
+- **Generation** produces the final response
 
-4. **Answer Generation**
-   - LLM synthesizes answers strictly from provided context
-   - Citations required for every response
-   - Refusal enforced when evidence is insufficient or conflicting
+No layer mixes responsibilities.
 
-5. **Evaluation**
-   - Fixed evaluation question set
-   - Tracks answer correctness, refusals, and failure modes
+### 2. Owner-Based Isolation
 
-6. **API and Logging**
-   - FastAPI-based query endpoint
-   - Full query trace logged for auditing
+Documents are segmented by metadata:
 
----
+- `finance`
+- `security`
+- `ops`
+- etc.
 
-## Refusal Logic (First-Class Outcome)
+Routing restricts retrieval to allowed owners, preventing cross-domain leakage.
 
-The system refuses to answer when:
-- Required information is not explicitly present
-- Authoritative documents conflict
-- Only low-authority evidence exists
-- Relevant documents are outdated
-- The query is outside system scope
+### 3. Governance Before Generation
 
-Refusal is a deliberate system decision, not an error state.
+Before any response is generated:
 
----
+- Outdated documents are removed
+- Internal notes are filtered
+- Conflicts between versions are resolved
+- Escalation and refusal logic is applied
 
-## Tech Stack
-
-- Python
-- FastAPI
-- Vector store (FAISS / pgvector)
-- LLM API (OpenAI / Claude)
-- Embeddings (OpenAI / SentenceTransformers)
-- Docker
-- JSON-based logging
-
-The system is framework-agnostic by design.
+The system is designed to **fail safely**, not optimistically.
 
 ---
 
 ## Project Structure
 
-project/
-│
-├── data/
-│   └── raw_docs/
-│       ├── policies/
-│       ├── sops/
-│       ├── faqs/
-│       └── notes/
-│
-├── ingestion/
-├── retrieval/
-├── generation/
-├── evaluation/
-├── api/
-├── logs/
-│
-├── DOCUMENT_UNIVERSE.md
-├── README.md
-└── Dockerfile
+```
+data/
+  raw_docs/
+    policies/
+    sops/
+    faqs/
+    notes/
+
+system/
+  intents/
+  routing/
+  retrieval/
+
+src/
+  intent_detection/
+  routing/
+  retrieval/
+    chunker.py
+    embedder.py
+    vector_store.py
+    retrieve.py
+  rules/
+    constraint_rules.py
+    governance_rules.py
+  pipeline/
+    rag_pipeline.py
+```
 
 ---
 
-## Design Philosophy
+## Retrieval Strategy (Current Version)
 
-- Trust > coverage
-- Refusal > hallucination
-- Traceability > fluency
-- Simple rules > complex heuristics
-- Explicit failure modes > silent errors
+- Dense embeddings using `sentence-transformers`
+- Cosine similarity ranking
+- Metadata filtering (owner-based scope enforcement)
+- Top-k chunk retrieval
 
----
+This version uses brute-force similarity. The architecture is designed to allow easy migration to:
 
-## Intended Audience
+- FAISS indexing
+- Hybrid retrieval (BM25 + dense)
+- Cross-encoder reranking
 
-This project is intended for:
-- Applied AI engineers
-- GenAI product teams
-- Enterprise AI and compliance-focused organizations
-
-It is not optimized for consumer chat experiences.
+without modifying intent, routing, or rule layers.
 
 ---
 
-## Status
+## Governance Layers
 
-This project is actively being built as a learning and demonstration system focused on production-grade GenAI design.
+### Constraint Rules
 
+- Remove internal notes
+- Drop outdated policy versions
+- Enforce owner boundaries
+- Clean retrieved context
 
+### Governance Rules
+
+- Detect escalation conditions
+- Identify unsafe or invalid requests
+- Determine final system action
+
+**Possible outcomes:**
+
+- Proceed to generation
+- Escalate to human review
+- Refuse with explanation
+
+---
+
+## Current Capabilities
+
+- End-to-end structured RAG flow
+- Metadata-aware retrieval
+- Deterministic rule enforcement
+- Clear architectural boundaries
+- Extendable retrieval layer
+- Modular governance system
+
+---
+
+## Future Enhancements (Planned)
+
+- Hybrid retrieval (BM25 + dense fusion)
+- Vector indexing with FAISS
+- Retrieval evaluation metrics
+- Faithfulness scoring
+- Latency and cost logging
+- Reranking with cross-encoders
+
+---
+
+## Intended Use Case
+
+This system simulates an internal enterprise support assistant for:
+
+- Policy interpretation
+- Refund and billing queries
+- Security documentation
+- SOP-based workflows
+- Incident handling references
+
+The architecture is domain-agnostic but designed for enterprise environments requiring governance.
+
+---
+
+## Why This Project Matters
+
+**This is not a chatbot.**
+
+It is a controlled, governed knowledge retrieval system built with production constraints in mind:
+
+- **Safety over convenience**
+- **Traceability over heuristics**
+- **Modularity over entanglement**
+
+It reflects real-world enterprise AI system design.
+
+---
+
+## Getting Started
+
+*(Add installation and usage instructions here)*
+
+---
+
+## License
+
+*(Add license information here)*
+
+---
+
+## Contact
+
+*(Add contact information here)*
