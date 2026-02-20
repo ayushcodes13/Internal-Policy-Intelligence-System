@@ -1,24 +1,123 @@
+import os
+import json
+from typing import List, Dict
+from groq import Groq
+
+from src.rules.types import GovernanceVerdict
+
+
+class GovernanceEngine:
+    """
+    Governance Layer
+
+    Responsibilities:
+    - Use LLM to detect risk signals
+    - Apply deterministic priority rules
+    - Return a final GovernanceVerdict
+
+    It does NOT:
+    - escalate
+    - refuse
+    - generate answers
+    - modify chunks
+    """
+
+    def __init__(self):
+        api_key = os.getenv("GROQ_API_KEY")
+        if not api_key:
+            raise RuntimeError("GROQ_API_KEY not found in environment")
+
+        self.client = Groq(api_key=api_key)
+        self.model = "llama-3.3-70b-versatile"
+
+    # --------------------------------------------------------
+    # Public method
+    # --------------------------------------------------------
+
+    def evaluate(
+        self,
+        user_query: str,
+        cleaned_chunks: List[Dict],
+    ) -> GovernanceVerdict:
+        """
+        Main governance evaluation entrypoint.
+        """
+
+        signals = self._llm_classify(user_query)
+
+        return self._resolve(signals)
+
+    # --------------------------------------------------------
+    # LLM Classification
+    # --------------------------------------------------------
+
+    def _llm_classify(self, user_query: str) -> Dict:
+        """
+        Calls LLM to detect:
+        - invalid input
+        - escalation needed
+        - policy denial
+        """
+
+        system_prompt = """
+You are a governance classifier.
+
+You must return STRICT JSON with this exact structure:
+
+{
+  "is_invalid": boolean,
+  "is_escalation": boolean,
+  "is_policy_denial": boolean
+}
+
+Rules:
+
+- is_invalid = true if query is nonsense, malicious, or unrelated to system domain.
+- is_escalation = true if issue involves fraud, legal risk, security breach, unusual financial claim, or anything that must be reviewed by a human.
+- is_policy_denial = true if the user is requesting something that is explicitly not allowed by policy.
+
+Do NOT explain.
+Do NOT add extra fields.
+Return JSON only.
 """
-Governance rules
 
-Question:
-“Given the allowed documents, how should they be interpreted or applied?”
+        response = self.client.chat.completions.create(
+            model=self.model,
+            temperature=0,
+            messages=[
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": user_query},
+            ],
+        )
 
-This layer operates on meaning and policy relationships.
+        raw = response.choices[0].message.content.strip()
 
-Handles:
-	•	policy precedence (new vs old)
-	•	conflict resolution
-	•	source authority
-	•	explanation framing
+        try:
+            return json.loads(raw)
+        except Exception:
+            # If parsing fails → safest fallback
+            return {
+                "is_invalid": False,
+                "is_escalation": False,
+                "is_policy_denial": False,
+            }
 
-Outcome:
-An interpreted, authoritative context ready for answer generation.
+    # --------------------------------------------------------
+    # Deterministic Resolver
+    # --------------------------------------------------------
 
-Governance rules:
-	•	do not remove documents arbitrarily
-	•	do not enforce access control
-	•	do not escalate or refuse
+    def _resolve(self, signals: Dict) -> GovernanceVerdict:
+        """
+        Applies fixed priority logic.
+        """
 
-They decide correctness, not safety.
-"""
+        if signals.get("is_invalid"):
+            return GovernanceVerdict.REFUSE_INVALID
+
+        if signals.get("is_escalation"):
+            return GovernanceVerdict.ESCALATE
+
+        if signals.get("is_policy_denial"):
+            return GovernanceVerdict.REFUSE_POLICY
+
+        return GovernanceVerdict.SAFE
