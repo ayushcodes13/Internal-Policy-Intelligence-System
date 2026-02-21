@@ -1,4 +1,5 @@
-from detect_intent import detect_intent as intent
+from detect_intent import IntentDetector
 
-result = intent("Is there any refund available?")
+detector = IntentDetector()
+result = detector.detect("Explain quantum entanglement.")
 print(result)

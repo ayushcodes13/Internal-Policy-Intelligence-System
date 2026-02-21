@@ -20,7 +20,7 @@ import os
 from groq import Groq
 from dotenv import load_dotenv
 
-from src.intent_detection.detect_intent import detect_intent
+from src.intent_detection.detect_intent import IntentDetector
 from src.routing.route_intent import route_intent
 
 from src.retrieval.retrieve import retrieve_chunks
@@ -34,8 +34,9 @@ from src.rules.handlers.refusal_handler import handle_refusal
 class RAGPipeline:
 
     def __init__(self):
-        load_dotenv()  # Load environment variables from .env file
+        load_dotenv()
 
+        self.intent_detector = IntentDetector()
         self.governance = GovernanceEngine()
 
         api_key = os.getenv("GROQ_API_KEY")
@@ -48,7 +49,7 @@ class RAGPipeline:
     def run(self, user_query: str) -> Dict[str, Any]:
 
         # 1️⃣ Intent Detection
-        intent_result = detect_intent(user_query)
+        intent_result = self.intent_detector.detect(user_query)
         print("INTENT RESULT:", intent_result)
 
         # 2️⃣ Routing
