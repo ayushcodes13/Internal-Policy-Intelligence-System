@@ -33,10 +33,8 @@ from src.rules.handlers.refusal_handler import handle_refusal
 
 
 class RAGPipeline:
-    def __init__(self):
+    def __init__(self): # Combined __init__ method
         load_dotenv()  # Load environment variables from .env file
-
-    def __init__(self):
         self.governance = GovernanceEngine()
 
         api_key = os.getenv("GROQ_API_KEY")
@@ -52,7 +50,7 @@ class RAGPipeline:
         intent_result = detect_intent(user_query)
 
         # 2️⃣ Routing
-        routing_result = route_intent(intent_result)
+        routing_result = route_intent(intent_result["intents"])
         allowed_owners = routing_result.get("allowed_owners", [])
         allowed_source_types = routing_result.get("allowed_source_types")
 
