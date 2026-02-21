@@ -70,10 +70,11 @@ def retrieve_chunks(
             np.array(chunk["embedding"])
         )
         scored_chunks.append({
-            "content": chunk["text"],
+            "chunk_id": chunk.get("chunk_id"),
+            "text": chunk["text"],
             "metadata": chunk["metadata"],
             "score": score
-        })
+})
 
     scored_chunks.sort(key=lambda x: x["score"], reverse=True)
 
