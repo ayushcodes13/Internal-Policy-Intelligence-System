@@ -148,13 +148,9 @@ Context:
             "context_used": len(top_chunks),
         }
         
-        
-        
 ## for local testing
 if __name__ == "__main__":
 		pipeline = RAGPipeline()
 		test_query = "What is the company's policy on remote work?"
 		result = pipeline.run(test_query)
 		print(result)
-
-
