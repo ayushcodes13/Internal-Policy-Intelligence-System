@@ -19,7 +19,52 @@ from typing import List, Dict
 import numpy as np
 from .embedder import embed_query
 from .embedder import embed_chunks
+from collections import defaultdict
 
+
+def _base_key(path: str) -> str:
+    """
+    Extract logical document identity.
+    billing_and_refund_policy_v1.md
+    billing_and_refund_policy_v2.md
+    → billing_and_refund_policy
+    """
+    filename = path.split("/")[-1]
+    return filename.split("_v")[0]
+
+
+def _keep_latest_versions(chunks: List[Dict]) -> List[Dict]:
+    """
+    From a list of chunks, keep only chunks belonging
+    to the newest document version per base_key.
+    """
+    grouped = defaultdict(list)
+
+    for chunk in chunks:
+        path = chunk["metadata"].get("path", "")
+        key = _base_key(path)
+        grouped[key].append(chunk)
+
+    result = []
+
+    for key, group in grouped.items():
+        # sort by last_updated descending
+        sorted_group = sorted(
+            group,
+            key=lambda c: c["metadata"].get("last_updated", ""),
+            reverse=True
+        )
+
+        newest_date = sorted_group[0]["metadata"].get("last_updated")
+
+        newest_chunks = [
+            c for c in sorted_group
+            if c["metadata"].get("last_updated") == newest_date
+        ]
+
+        result.extend(newest_chunks)
+
+    return result
 
 def cosine_similarity(vec1: np.ndarray, vec2: np.ndarray) -> float:
     """Compute cosine similarity between two vectors."""
@@ -50,21 +95,28 @@ def retrieve_chunks(
     embedded_chunks = embed_chunks(chunks)
     print("SAMPLE METADATA OWNER:", repr(embedded_chunks[0]["metadata"].get("owner")))
 
-    # 4️⃣ Metadata filter
+    # 4️⃣ Owner filter
     filtered_chunks = [
         chunk for chunk in embedded_chunks
         if chunk["metadata"].get("owner") in allowed_owners
     ]
+
     print("FILTERED CHUNK COUNT:", len(filtered_chunks))
+
     if not filtered_chunks:
         return []
+
+    # 5️⃣ Authority dominance (version control BEFORE similarity)
+    authoritative_chunks = _keep_latest_versions(filtered_chunks)
+
+    print("AFTER VERSION FILTER:", len(authoritative_chunks))
 
     # 5️⃣ Embed query
     question_vector = embed_query(user_query)
 
     # 6️⃣ Similarity scoring
     scored_chunks = []
-    for chunk in filtered_chunks:
+    for chunk in authoritative_chunks:
         score = cosine_similarity(
             question_vector,
             np.array(chunk["embedding"])

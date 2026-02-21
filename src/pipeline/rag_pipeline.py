@@ -31,10 +31,11 @@ from src.rules.types import GovernanceVerdict
 from src.rules.handlers.escalation_handler import handle_escalation
 from src.rules.handlers.refusal_handler import handle_refusal
 
-
 class RAGPipeline:
-    def __init__(self): # Combined __init__ method
+
+    def __init__(self):
         load_dotenv()  # Load environment variables from .env file
+
         self.governance = GovernanceEngine()
 
         api_key = os.getenv("GROQ_API_KEY")
@@ -105,24 +106,24 @@ class RAGPipeline:
                 "context_used": 0,
             }
 
-        # Use top 5 chunks only to control token usage
+        # Use top 5 chunks to control token usage
         top_chunks = cleaned_chunks[:5]
 
         context_text = "\n\n".join(
-            chunk.get("content", "") for chunk in top_chunks
+            chunk.get("text", "") for chunk in top_chunks
         )
 
         system_prompt = """
-You are a strict internal support assistant.
+    You are a strict internal support assistant.
 
-Rules:
-- Answer ONLY using the provided context.
-- If the answer is not clearly supported by the context, respond exactly with:
-  "The requested information is not available in the current policy documents."
-- Do NOT invent policies.
-- Do NOT speculate.
-- Be concise and factual.
-"""
+    Rules:
+    - Answer ONLY using the provided context.
+    - If the answer is not clearly supported by the context, respond exactly with:
+    "The requested information is not available in the current policy documents."
+    - Do NOT invent policies.
+    - Do NOT speculate.
+    - Be concise and factual.
+    """
 
         response = self.client.chat.completions.create(
             model=self.model,
@@ -131,26 +132,26 @@ Rules:
                 {"role": "system", "content": system_prompt},
                 {
                     "role": "user",
-                    "content": f"""
-User Question:
-{user_query}
+                    "content": f"""User Question:
+    {user_query}
 
-Context:
-{context_text}
-"""
+    Context:
+    {context_text}
+    """
                 },
             ],
         )
 
+        answer = response.choices[0].message.content.strip()
+
         return {
             "status": "SAFE",
-            "answer": response.choices[0].message.content.strip(),
+            "answer": answer,
             "context_used": len(top_chunks),
         }
-        
 ## for local testing
 if __name__ == "__main__":
 		pipeline = RAGPipeline()
-		test_query = "What is the company's policy on remote work?"
+		test_query = "What is the refund period?"
 		result = pipeline.run(test_query)
 		print(result)
