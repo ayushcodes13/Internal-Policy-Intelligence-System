@@ -41,6 +41,7 @@ def embed_chunks(chunks: List[Dict]) -> List[Dict]:
     embedded_chunks = []
     for chunk, vector in zip(chunks, embeddings):
         embedded_chunks.append({
+            "chunk_id": chunk.get("chunk_id"),
             "text": chunk["text"],
             "embedding": vector.tolist(),  # convert numpy → list
             "metadata": chunk["metadata"]
