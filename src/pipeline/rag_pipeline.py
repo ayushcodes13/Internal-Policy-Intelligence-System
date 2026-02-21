@@ -62,10 +62,9 @@ class RAGPipeline:
 
         # 4️⃣ Constraint Rules
         cleaned_chunks = apply_constraint_rules(
-            chunks=retrieved_chunks,
-            allowed_owners=allowed_owners,
-            allowed_source_types=allowed_source_types,
-        )
+    retrieved_chunks,
+    allowed_owners
+)
 
         # 5️⃣ Governance
         verdict = self.governance.evaluate(
