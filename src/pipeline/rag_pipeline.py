@@ -53,6 +53,7 @@ class RAGPipeline:
         # 2️⃣ Routing
         routing_result = route_intent(intent_result["intents"])
         allowed_owners = routing_result.get("allowed_owners", [])
+        print("ALLOWED OWNERS:", allowed_owners)
         allowed_source_types = routing_result.get("allowed_source_types")
         print("INTENTS PASSED TO ROUTING:", intent_result["intents"])
 

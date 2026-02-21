@@ -38,6 +38,7 @@ def retrieve_chunks(
     allowed_owners: List[str],
     top_k: int = 5
 ) -> List[Dict]:
+    print("RETRIEVE - allowed_owners:", allowed_owners)
 
     # 1️⃣ Load docs
     docs = load_markdown_files(base_path="data/raw_docs")
@@ -47,13 +48,14 @@ def retrieve_chunks(
 
     # 3️⃣ Embed chunks
     embedded_chunks = embed_chunks(chunks)
+    print("SAMPLE METADATA OWNER:", repr(embedded_chunks[0]["metadata"].get("owner")))
 
     # 4️⃣ Metadata filter
     filtered_chunks = [
         chunk for chunk in embedded_chunks
         if chunk["metadata"].get("owner") in allowed_owners
     ]
-
+    print("FILTERED CHUNK COUNT:", len(filtered_chunks))
     if not filtered_chunks:
         return []
 
