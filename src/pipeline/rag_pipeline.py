@@ -48,11 +48,13 @@ class RAGPipeline:
 
         # 1️⃣ Intent Detection
         intent_result = detect_intent(user_query)
+        print("INTENT RESULT:", intent_result)
 
         # 2️⃣ Routing
         routing_result = route_intent(intent_result["intents"])
         allowed_owners = routing_result.get("allowed_owners", [])
         allowed_source_types = routing_result.get("allowed_source_types")
+        print("INTENTS PASSED TO ROUTING:", intent_result["intents"])
 
         # 3️⃣ Retrieval
         retrieved_chunks = retrieve_chunks(
@@ -153,3 +155,5 @@ if __name__ == "__main__":
 		test_query = "What is the company's policy on remote work?"
 		result = pipeline.run(test_query)
 		print(result)
+
+
