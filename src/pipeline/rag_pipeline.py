@@ -18,6 +18,7 @@ It only connects components.
 from typing import Dict, Any, List
 import os
 from groq import Groq
+from dotenv import load_dotenv
 
 from src.intent_detection.detect_intent import detect_intent
 from src.routing.route_intent import route_intent
@@ -32,6 +33,8 @@ from src.rules.handlers.refusal_handler import handle_refusal
 
 
 class RAGPipeline:
+    def __init__(self):
+        load_dotenv()  # Load environment variables from .env file
 
     def __init__(self):
         self.governance = GovernanceEngine()
