@@ -19,6 +19,7 @@ from typing import Dict, Any, List
 import os
 from groq import Groq
 from dotenv import load_dotenv
+import json
 
 from src.intent_detection.detect_intent import IntentDetector
 from src.routing.route_intent import route_intent
@@ -96,34 +97,58 @@ class RAGPipeline:
         cleaned_chunks: List[Dict],
     ) -> Dict[str, Any]:
         """
-        Real RAG generation using Groq.
-        Strictly grounded in retrieved context.
+        Hardened RAG generation.
+        - Structured JSON output
+        - Mandatory source citation
+        - Mandatory supporting clause extraction
+        - Deterministic behavior
         """
 
         if not cleaned_chunks:
             return {
                 "status": "SAFE",
-                "answer": "The requested information is not available in the current policy documents.",
+                "answer": None,
+                "sources": [],
+                "supporting_clauses": [],
+                "confidence": "low",
                 "context_used": 0,
             }
 
         # Use top 5 chunks to control token usage
         top_chunks = cleaned_chunks[:5]
 
-        context_text = "\n\n".join(
-            chunk.get("text", "") for chunk in top_chunks
-        )
+        context_blocks = []
+        for chunk in top_chunks:
+            path = chunk["metadata"].get("path", "unknown")
+            text = chunk.get("text", "")
+            context_blocks.append(f"Document: {path}\n{text}")
+
+        context_text = "\n\n---\n\n".join(context_blocks)
 
         system_prompt = """
-    You are a strict internal support assistant.
+    You are a strict internal policy assistant.
+
+    You MUST return STRICT JSON in this exact format:
+
+    {
+    "answer": string | null,
+    "sources": [string],
+    "supporting_clauses": [string],
+    "confidence": "high" | "medium" | "low"
+    }
 
     Rules:
-    - Answer ONLY using the provided context.
-    - If the answer is not clearly supported by the context, respond exactly with:
-    "The requested information is not available in the current policy documents."
+    - Use ONLY the provided context.
+    - If the answer is not clearly supported, set:
+        "answer": null,
+        "sources": [],
+        "supporting_clauses": [],
+        "confidence": "low"
+    - Every source MUST exactly match a provided document path.
+    - Every supporting clause MUST be an exact quote from the context.
     - Do NOT invent policies.
-    - Do NOT speculate.
-    - Be concise and factual.
+    - Do NOT explain outside JSON.
+    - Do NOT add extra fields.
     """
 
         response = self.client.chat.completions.create(
@@ -143,13 +168,42 @@ class RAGPipeline:
             ],
         )
 
-        answer = response.choices[0].message.content.strip()
+        raw_output = response.choices[0].message.content.strip()
+
+        # 🔐 Safe JSON parsing
+        try:
+            parsed = json.loads(raw_output)
+        except Exception:
+            return {
+                "status": "SAFE",
+                "answer": None,
+                "sources": [],
+                "supporting_clauses": [],
+                "confidence": "low",
+                "context_used": len(top_chunks),
+            }
+
+        # 🔎 Validate cited sources actually exist in context
+        valid_paths = {
+            chunk["metadata"].get("path")
+            for chunk in top_chunks
+        }
+
+        cited_sources = [
+            src for src in parsed.get("sources", [])
+            if src in valid_paths
+        ]
 
         return {
             "status": "SAFE",
-            "answer": answer,
+            "answer": parsed.get("answer"),
+            "sources": cited_sources,
+            "supporting_clauses": parsed.get("supporting_clauses", []),
+            "confidence": parsed.get("confidence", "low"),
             "context_used": len(top_chunks),
         }
+
+
 ## for local testing
 if __name__ == "__main__":
 		pipeline = RAGPipeline()
