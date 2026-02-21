@@ -23,7 +23,7 @@ from src.intent_detection.detect_intent import detect_intent
 from src.routing.route_intent import route_intent
 
 from src.retrieval.retrieve import retrieve_chunks
-from src.rules.constraint_rules import apply_constraint_rules
+from src.rules.constraint_rules import apply_constraints as apply_constraint_rules
 from src.rules.governance_rules import GovernanceEngine
 from src.rules.types import GovernanceVerdict
 
@@ -144,3 +144,12 @@ Context:
             "answer": response.choices[0].message.content.strip(),
             "context_used": len(top_chunks),
         }
+        
+        
+        
+## for local testing
+if __name__ == "__main__":
+		pipeline = RAGPipeline()
+		test_query = "What is the company's policy on remote work?"
+		result = pipeline.run(test_query)
+		print(result)
