@@ -294,3 +294,7 @@ if __name__ == "__main__":
     test_query = "Can I get a refund after account termination due to policy violation?"
     result = pipeline.run(test_query)
     print(result)
+    
+    
+
+## python -m src.pipeline.rag_pipeline -> to run the pipeline locally 

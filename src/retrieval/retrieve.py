@@ -1,81 +1,30 @@
 """
-Job:
-The bridge between routing and vector search.
+Query-Time Retrieval
 
-What it does:
-	1.	Accepts:
-	•	question
-	•	allowed_sources (from routing)
-	2.	Queries vector store
-	3.	Filters results by metadata
-	4.	Returns top-k chunks
+Uses pre-built FAISS index.
 
-This is where:
-	•	routing actually matters
-	•	metadata becomes powerful
-
+Steps:
+1. Load FAISS index
+2. Load metadata store
+3. Embed query
+4. Search index
+5. Reconstruct chunks
+6. Filter latest versions
+7. Return top-k
 """
+
+import os
+import pickle
 from typing import List, Dict
+
+import faiss
 import numpy as np
-from .embedder import embed_query
-from .embedder import embed_chunks
-from collections import defaultdict
+
+from src.retrieval.embedder import embed_query
 
 
-def _base_key(path: str) -> str:
-    """
-    Extract logical document identity.
-    billing_and_refund_policy_v1.md
-    billing_and_refund_policy_v2.md
-    → billing_and_refund_policy
-    """
-    filename = path.split("/")[-1]
-    return filename.split("_v")[0]
-
-
-def _keep_latest_versions(chunks: List[Dict]) -> List[Dict]:
-    """
-    From a list of chunks, keep only chunks belonging
-    to the newest document version per base_key.
-    """
-    grouped = defaultdict(list)
-
-    for chunk in chunks:
-        path = chunk["metadata"].get("path", "")
-        key = _base_key(path)
-        grouped[key].append(chunk)
-
-    result = []
-
-    for key, group in grouped.items():
-        # sort by last_updated descending
-        sorted_group = sorted(
-            group,
-            key=lambda c: c["metadata"].get("last_updated", ""),
-            reverse=True
-        )
-
-        newest_date = sorted_group[0]["metadata"].get("last_updated")
-
-        newest_chunks = [
-            c for c in sorted_group
-            if c["metadata"].get("last_updated") == newest_date
-        ]
-
-        result.extend(newest_chunks)
-
-    return result
-
-def cosine_similarity(vec1: np.ndarray, vec2: np.ndarray) -> float:
-    """Compute cosine similarity between two vectors."""
-    if np.linalg.norm(vec1) == 0 or np.linalg.norm(vec2) == 0:
-        return 0.0
-    return float(np.dot(vec1, vec2) / (np.linalg.norm(vec1) * np.linalg.norm(vec2)))
-
-
-from src.utils.loaders import load_markdown_files
-from src.retrieval.chunker import chunk_documents
-from src.retrieval.embedder import embed_chunks
+INDEX_PATH = "data/index/faiss.index"
+METADATA_PATH = "data/index/metadata.pkl"
 
 
 def retrieve_chunks(
@@ -83,51 +32,54 @@ def retrieve_chunks(
     allowed_owners: List[str],
     top_k: int = 5
 ) -> List[Dict]:
-    print("RETRIEVE - allowed_owners:", allowed_owners)
 
-    # 1️⃣ Load docs
-    docs = load_markdown_files(base_path="data/raw_docs")
+    if not os.path.exists(INDEX_PATH):
+        raise RuntimeError("FAISS index not found. Run index_builder first.")
 
-    # 2️⃣ Chunk
-    chunks = chunk_documents(docs)
+    # Load FAISS index
+    index = faiss.read_index(INDEX_PATH)
 
-    # 3️⃣ Embed chunks
-    embedded_chunks = embed_chunks(chunks)
-    print("SAMPLE METADATA OWNER:", repr(embedded_chunks[0]["metadata"].get("owner")))
+    # Load metadata store
+    with open(METADATA_PATH, "rb") as f:
+        metadata_store = pickle.load(f)
 
-    # 4️⃣ Owner filter
-    filtered_chunks = [
-        chunk for chunk in embedded_chunks
-        if chunk["metadata"].get("owner") in allowed_owners
-    ]
+    # Embed query
+    query_vector = np.array(embed_query(user_query)).astype("float32")
+    faiss.normalize_L2(query_vector.reshape(1, -1))
 
-    print("FILTERED CHUNK COUNT:", len(filtered_chunks))
+    # Search
+    distances, indices = index.search(
+        query_vector.reshape(1, -1),
+        top_k * 3  # over-fetch to allow filtering
+    )
 
-    if not filtered_chunks:
-        return []
+    results = []
 
-    # 5️⃣ Authority dominance (version control BEFORE similarity)
-    authoritative_chunks = _keep_latest_versions(filtered_chunks)
+    for idx in indices[0]:
+        if idx == -1:
+            continue
 
-    print("AFTER VERSION FILTER:", len(authoritative_chunks))
+        chunk_data = metadata_store.get(idx)
 
-    # 5️⃣ Embed query
-    question_vector = embed_query(user_query)
+        if not chunk_data:
+            continue
 
-    # 6️⃣ Similarity scoring
-    scored_chunks = []
-    for chunk in authoritative_chunks:
-        score = cosine_similarity(
-            question_vector,
-            np.array(chunk["embedding"])
-        )
-        scored_chunks.append({
-            "chunk_id": chunk.get("chunk_id"),
-            "text": chunk["text"],
-            "metadata": chunk["metadata"],
-            "score": score
-})
+        metadata = chunk_data["metadata"]
 
-    scored_chunks.sort(key=lambda x: x["score"], reverse=True)
+        # Owner filter
+        if metadata.get("owner") not in allowed_owners:
+            continue
 
-    return scored_chunks[:top_k]
+        # Latest version filter
+        if not metadata.get("is_latest", False):
+            continue
+
+        results.append({
+            "text": chunk_data["text"],
+            "metadata": metadata
+        })
+
+        if len(results) >= top_k:
+            break
+
+    return results
