@@ -68,8 +68,15 @@ class GovernanceEngine:
         """
 
         signals = self._llm_classify(user_query)
+        verdict = self._resolve(signals)
 
-        return self._resolve(signals)
+        # Deterministic domain enforcement:
+        # If LLM says SAFE but nothing was retrieved,
+        # this is out-of-domain → refuse.
+        if verdict == GovernanceVerdict.SAFE and not cleaned_chunks:
+            return GovernanceVerdict.REFUSE_INVALID
+
+        return verdict
 
     # --------------------------------------------------------
     # LLM Classification

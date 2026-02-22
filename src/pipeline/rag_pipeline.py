@@ -69,7 +69,7 @@ class RAGPipeline:
         retrieval_output = retrieve_chunks(
             user_query=user_query,
             allowed_owners=allowed_owners,
-            debug=True
+            debug=False
         )
 
         if isinstance(retrieval_output, dict):
@@ -81,8 +81,8 @@ class RAGPipeline:
             
         retrieval_time_ms = round((time.time() - retrieval_start) * 1000, 2)
         
-        print("\n=== RETRIEVAL DIAGNOSTICS ===")
         for d in diagnostics:
+            print("\n=== RETRIEVAL DIAGNOSTICS ===")
             print(
                 f"Path: {d['path']} | "
                 f"Owner: {d['owner']} | "
@@ -112,6 +112,7 @@ class RAGPipeline:
             cleaned_chunks=cleaned_chunks,
             pipeline=self
         )
+        result["verdict"] = verdict.name
 
         total_time_ms = round((time.time() - start_time) * 1000, 2)
 
