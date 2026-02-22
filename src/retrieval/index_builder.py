@@ -66,6 +66,8 @@ def _apply_version_metadata(chunks: List[Dict]) -> List[Dict]:
 
     return enriched_chunks
 
+## Mark newest document: metadata["is_latest"] = True
+## Mark older versions: metadata["is_latest"] = False
 
 def build_index():
 

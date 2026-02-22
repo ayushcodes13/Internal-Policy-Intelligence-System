@@ -1,24 +1,8 @@
-"""
-Query-Time Retrieval
-
-Uses pre-built FAISS index.
-
-Steps:
-1. Load FAISS index
-2. Load metadata store
-3. Embed query
-4. Search index
-5. Reconstruct chunks
-6. Filter latest versions
-7. Return top-k
-"""
-
-import os
-import pickle
-from typing import List, Dict
-
-import faiss
+from typing import List, Dict, Union
 import numpy as np
+import faiss
+import pickle
+import os
 
 from src.retrieval.embedder import embed_query
 
@@ -30,56 +14,78 @@ METADATA_PATH = "data/index/metadata.pkl"
 def retrieve_chunks(
     user_query: str,
     allowed_owners: List[str],
-    top_k: int = 5
-) -> List[Dict]:
+    top_k: int = 5,
+    debug: bool = False
+) -> Union[List[Dict], Dict]:
 
     if not os.path.exists(INDEX_PATH):
         raise RuntimeError("FAISS index not found. Run index_builder first.")
 
-    # Load FAISS index
+    # Load index + metadata
     index = faiss.read_index(INDEX_PATH)
 
-    # Load metadata store
     with open(METADATA_PATH, "rb") as f:
         metadata_store = pickle.load(f)
 
-    # Embed query
-    query_vector = np.array(embed_query(user_query)).astype("float32")
-    faiss.normalize_L2(query_vector.reshape(1, -1))
+    # 1️⃣ Embed query
+    query_vector = np.array([embed_query(user_query)]).astype("float32")
 
-    # Search
-    distances, indices = index.search(
-        query_vector.reshape(1, -1),
-        top_k * 3  # over-fetch to allow filtering
-    )
+    # 2️⃣ Over-fetch
+    overfetch_k = top_k * 5
+    distances, indices = index.search(query_vector, overfetch_k)
 
-    results = []
+    candidates = []
+    diagnostics = []
 
-    for idx in indices[0]:
+    for score, idx in zip(distances[0], indices[0]):
+
         if idx == -1:
             continue
 
-        chunk_data = metadata_store.get(idx)
+        chunk = metadata_store[idx]
 
-        if not chunk_data:
-            continue
-
-        metadata = chunk_data["metadata"]
+        diag_entry = {
+            "path": chunk["metadata"].get("path"),
+            "owner": chunk["metadata"].get("owner"),
+            "is_latest": chunk["metadata"].get("is_latest"),
+            "score": float(score),
+            "filtered_out": False,
+            "reason": None
+        }
 
         # Owner filter
-        if metadata.get("owner") not in allowed_owners:
+        if chunk["metadata"].get("owner") not in allowed_owners:
+            diag_entry["filtered_out"] = True
+            diag_entry["reason"] = "owner_mismatch"
+            diagnostics.append(diag_entry)
             continue
 
-        # Latest version filter
-        if not metadata.get("is_latest", False):
+        # Version dominance (is_latest filter)
+        if not chunk["metadata"].get("is_latest", True):
+            diag_entry["filtered_out"] = True
+            diag_entry["reason"] = "not_latest_version"
+            diagnostics.append(diag_entry)
             continue
 
-        results.append({
-            "text": chunk_data["text"],
-            "metadata": metadata
+        diag_entry["filtered_out"] = False
+        diagnostics.append(diag_entry)
+
+        candidates.append({
+            "chunk_id": chunk.get("chunk_id"),
+            "text": chunk.get("text"),
+            "metadata": chunk.get("metadata"),
+            "score": float(score)
         })
 
-        if len(results) >= top_k:
-            break
+    # 3️⃣ Sort remaining by similarity (FAISS already sorted but we ensure)
+    candidates.sort(key=lambda x: x["score"], reverse=True)
 
-    return results
+    final_chunks = candidates[:top_k]
+
+    if debug:
+        return {
+            "final_chunks": final_chunks,
+            "diagnostics": diagnostics
+        }
+
+    return final_chunks

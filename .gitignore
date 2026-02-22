@@ -209,3 +209,6 @@ __marimo__/
 
 # Generated vector index
 data/index/
+
+# Runtime logs
+logs/

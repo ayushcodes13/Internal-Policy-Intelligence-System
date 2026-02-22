@@ -28,10 +28,15 @@ from src.rules.constraint_rules import apply_constraints
 from src.rules.governance_rules import GovernanceEngine
 from src.rules.handlers.verdict_handler import handle_verdict
 
+from src.utils.logger import StructuredLogger
+import time
+
 
 class RAGPipeline:
 
     def __init__(self):
+        self.logger = StructuredLogger(enable_file_logging=True)
+        
         load_dotenv()
 
         self.intent_detector = IntentDetector()
@@ -50,6 +55,8 @@ class RAGPipeline:
 
     def run(self, user_query: str) -> Dict[str, Any]:
 
+        start_time = time.time()
+
         # 1️⃣ Intent Detection
         intent_result = self.intent_detector.detect(user_query)
 
@@ -58,10 +65,33 @@ class RAGPipeline:
         allowed_owners = routing_result.get("allowed_owners", [])
 
         # 3️⃣ Retrieval
-        retrieved_chunks = retrieve_chunks(
+        retrieval_start = time.time()
+        retrieval_output = retrieve_chunks(
             user_query=user_query,
             allowed_owners=allowed_owners,
+            debug=True
         )
+
+        if isinstance(retrieval_output, dict):
+            retrieved_chunks = retrieval_output["final_chunks"]
+            diagnostics = retrieval_output["diagnostics"]
+        else:
+            retrieved_chunks = retrieval_output
+            diagnostics = []   
+            
+        retrieval_time_ms = round((time.time() - retrieval_start) * 1000, 2)
+        
+        print("\n=== RETRIEVAL DIAGNOSTICS ===")
+        for d in diagnostics:
+            print(
+                f"Path: {d['path']} | "
+                f"Owner: {d['owner']} | "
+                f"is_latest: {d['is_latest']} | "
+                f"Score: {round(d['score'], 4)} | "
+                f"Filtered: {d['filtered_out']} | "
+                f"Reason: {d['reason']}"
+            )
+        print("================================\n")
 
         # 4️⃣ Constraints
         cleaned_chunks = apply_constraints(
@@ -76,12 +106,33 @@ class RAGPipeline:
         )
 
         # 6️⃣ Unified Action Handling
-        return handle_verdict(
+        result = handle_verdict(
             verdict=verdict,
             user_query=user_query,
             cleaned_chunks=cleaned_chunks,
             pipeline=self
         )
+
+        total_time_ms = round((time.time() - start_time) * 1000, 2)
+
+        # 7️⃣ Structured Log
+        self.logger.log(
+            event="QUERY_EXECUTION",
+            data={
+                "query": user_query,
+                "intents": intent_result.get("intents"),
+                "allowed_owners": allowed_owners,
+                "retrieval_time_ms": retrieval_time_ms,
+                "retrieved_count": len(retrieved_chunks),
+                "governance_verdict": verdict.name,
+                "final_status": result.get("status"),
+                "confidence": result.get("confidence"),
+                "total_latency_ms": total_time_ms,
+            }
+        )
+
+        return result
+
 
     # ==========================================================
     # SAFE GENERATION
