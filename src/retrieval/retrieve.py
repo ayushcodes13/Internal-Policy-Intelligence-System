@@ -5,10 +5,21 @@ import pickle
 import os
 
 from src.retrieval.embedder import embed_query
-
+from src.retrieval.reranker import rerank
+# Hybrid import (safe even if file not fully used yet)
+try:
+    from src.retrieval.hybrid import hybrid_merge
+except Exception:
+    hybrid_merge = None
 
 INDEX_PATH = "data/index/faiss.index"
 METADATA_PATH = "data/index/metadata.pkl"
+
+# ==============================
+# Feature Flags (Future-Proof)
+# ==============================
+ENABLE_HYBRID = False      # OFF by default
+ENABLE_RERANKER = True     # Keep current behavior
 
 
 def retrieve_chunks(
@@ -31,8 +42,11 @@ def retrieve_chunks(
     query_vector = np.array([embed_query(user_query)]).astype("float32")
 
     # 2️⃣ Over-fetch
-    overfetch_k = top_k * 5
+    overfetch_k = top_k * 8
     distances, indices = index.search(query_vector, overfetch_k)
+
+    print("Overfetch_k:", overfetch_k)
+    print("Returned indices:", len(indices[0]))
 
     candidates = []
     diagnostics = []
@@ -77,10 +91,40 @@ def retrieve_chunks(
             "score": float(score)
         })
 
-    # 3️⃣ Sort remaining by similarity (FAISS already sorted but we ensure)
+    # ✅ Print after filtering
+    print("Candidates after metadata filter:", len(candidates))
+
+    # 3️⃣ Sort by FAISS similarity
     candidates.sort(key=lambda x: x["score"], reverse=True)
 
-    final_chunks = candidates[:top_k]
+    # ✅ Print ranking before rerank
+    print("\nTop candidates after FAISS (before rerank):")
+    for i, chunk in enumerate(candidates[:10]):
+        print(f"{i+1}.", chunk["metadata"].get("path"), "| Score:", chunk["score"])
+
+    # ==============================
+    # Hybrid (Optional, OFF by default)
+    # ==============================
+    if ENABLE_HYBRID and hybrid_merge is not None:
+        try:
+            # Placeholder: vector-only fallback if no BM25 yet
+            # You can later plug real BM25 results here
+            candidates = hybrid_merge(candidates, [])
+        except Exception:
+            pass
+
+    # ==============================
+    # Reranker (Controlled by flag)
+    # ==============================
+    if ENABLE_RERANKER and candidates:
+        try:
+            reranked = rerank(user_query, candidates)
+        except Exception:
+            reranked = candidates
+    else:
+        reranked = candidates
+
+    final_chunks = reranked[:top_k]
 
     if debug:
         return {
@@ -89,6 +133,7 @@ def retrieve_chunks(
         }
 
     return final_chunks
+
 
 """
 Role of Retrieval diagnostic in simple language:
@@ -101,14 +146,14 @@ Query:
 “What is the refund period?”
 
 Diagnostics shows:
-	•	Rank 1 → billing_and_refund_policy_v2 (score 0.88, is_latest=True)
-	•	Rank 2 → refund_handling_sop (score 0.81)
-	•	Rank 3 → billing_and_refund_policy_v1 (score 0.79, is_latest=False → filtered)
+    • Rank 1 → billing_and_refund_policy_v2 (score 0.88, is_latest=True)
+    • Rank 2 → refund_handling_sop (score 0.81)
+    • Rank 3 → billing_and_refund_policy_v1 (score 0.79, is_latest=False → filtered)
 
 You immediately see:
-	•	Good: v2 ranked top
-	•	Good: v1 filtered
-	•	Owner filter worked
+    • Good: v2 ranked top
+    • Good: v1 filtered
+    • Owner filter worked
 
 If it ranked v1 first and v2 fifth:
 Diagnostics exposes ranking weakness.
