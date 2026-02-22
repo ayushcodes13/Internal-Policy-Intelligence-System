@@ -9,28 +9,25 @@ User Query
 → Retrieval
 → Constraint Rules
 → Governance
-→ Handler or Generation
+→ Verdict Handler
 
-This file contains NO business logic.
-It only connects components.
+This file contains NO decision logic.
+It only orchestrates components and handles generation.
 """
 
 from typing import Dict, Any, List
 import os
+import json
 from groq import Groq
 from dotenv import load_dotenv
-import json
 
 from src.intent_detection.detect_intent import IntentDetector
 from src.routing.route_intent import route_intent
-
 from src.retrieval.retrieve import retrieve_chunks
-from src.rules.constraint_rules import apply_constraints as apply_constraint_rules
+from src.rules.constraint_rules import apply_constraints
 from src.rules.governance_rules import GovernanceEngine
-from src.rules.types import GovernanceVerdict
+from src.rules.handlers.verdict_handler import handle_verdict
 
-from src.rules.handlers.escalation_handler import handle_escalation
-from src.rules.handlers.refusal_handler import handle_refusal
 
 class RAGPipeline:
 
@@ -47,18 +44,18 @@ class RAGPipeline:
         self.client = Groq(api_key=api_key)
         self.model = "llama-3.3-70b-versatile"
 
+    # ==========================================================
+    # Main Entry
+    # ==========================================================
+
     def run(self, user_query: str) -> Dict[str, Any]:
 
         # 1️⃣ Intent Detection
         intent_result = self.intent_detector.detect(user_query)
-        print("INTENT RESULT:", intent_result)
 
         # 2️⃣ Routing
         routing_result = route_intent(intent_result["intents"])
         allowed_owners = routing_result.get("allowed_owners", [])
-        print("ALLOWED OWNERS:", allowed_owners)
-        allowed_source_types = routing_result.get("allowed_source_types")
-        print("INTENTS PASSED TO ROUTING:", intent_result["intents"])
 
         # 3️⃣ Retrieval
         retrieved_chunks = retrieve_chunks(
@@ -66,11 +63,11 @@ class RAGPipeline:
             allowed_owners=allowed_owners,
         )
 
-        # 4️⃣ Constraint Rules
-        cleaned_chunks = apply_constraint_rules(
-    retrieved_chunks,
-    allowed_owners
-)
+        # 4️⃣ Constraints
+        cleaned_chunks = apply_constraints(
+            retrieved_chunks,
+            allowed_owners
+        )
 
         # 5️⃣ Governance
         verdict = self.governance.evaluate(
@@ -78,43 +75,35 @@ class RAGPipeline:
             cleaned_chunks=cleaned_chunks,
         )
 
-        # 6️⃣ Action Handling
-        if verdict == GovernanceVerdict.ESCALATE:
-            return handle_escalation(user_query, cleaned_chunks)
+        # 6️⃣ Unified Action Handling
+        return handle_verdict(
+            verdict=verdict,
+            user_query=user_query,
+            cleaned_chunks=cleaned_chunks,
+            pipeline=self
+        )
 
-        if verdict in [
-            GovernanceVerdict.REFUSE_INVALID,
-            GovernanceVerdict.REFUSE_POLICY,
-        ]:
-            return handle_refusal(verdict)
-
-        # 7️⃣ SAFE → Generation
-        return self._generate_answer(user_query, cleaned_chunks)
+    # ==========================================================
+    # SAFE GENERATION
+    # ==========================================================
 
     def _generate_answer(
         self,
         user_query: str,
         cleaned_chunks: List[Dict],
     ) -> Dict[str, Any]:
-        """
-        Hardened RAG generation.
-        - Structured JSON output
-        - Mandatory source citation
-        - Mandatory supporting clause extraction
-        - Deterministic behavior
-        """
 
         if not cleaned_chunks:
             return {
                 "status": "SAFE",
                 "answer": None,
+                "message": None,
                 "sources": [],
                 "supporting_clauses": [],
                 "confidence": "low",
                 "context_used": 0,
             }
 
-        # Use top 5 chunks to control token usage
         top_chunks = cleaned_chunks[:5]
 
         context_blocks = []
@@ -126,30 +115,24 @@ class RAGPipeline:
         context_text = "\n\n---\n\n".join(context_blocks)
 
         system_prompt = """
-    You are a strict internal policy assistant.
+You are a strict internal policy assistant.
 
-    You MUST return STRICT JSON in this exact format:
+Return STRICT JSON:
 
-    {
-    "answer": string | null,
-    "sources": [string],
-    "supporting_clauses": [string],
-    "confidence": "high" | "medium" | "low"
-    }
+{
+  "answer": string | null,
+  "sources": [string],
+  "supporting_clauses": [string],
+  "confidence": "high" | "medium" | "low"
+}
 
-    Rules:
-    - Use ONLY the provided context.
-    - If the answer is not clearly supported, set:
-        "answer": null,
-        "sources": [],
-        "supporting_clauses": [],
-        "confidence": "low"
-    - Every source MUST exactly match a provided document path.
-    - Every supporting clause MUST be an exact quote from the context.
-    - Do NOT invent policies.
-    - Do NOT explain outside JSON.
-    - Do NOT add extra fields.
-    """
+Rules:
+- Use ONLY provided context.
+- Every source must match a document path exactly.
+- Supporting clauses must be exact quotes.
+- If unsupported, return null answer and low confidence.
+- No extra fields.
+"""
 
         response = self.client.chat.completions.create(
             model=self.model,
@@ -158,32 +141,32 @@ class RAGPipeline:
                 {"role": "system", "content": system_prompt},
                 {
                     "role": "user",
-                    "content": f"""User Question:
-    {user_query}
+                    "content": f"""
+User Question:
+{user_query}
 
-    Context:
-    {context_text}
-    """
+Context:
+{context_text}
+"""
                 },
             ],
         )
 
-        raw_output = response.choices[0].message.content.strip()
+        raw = response.choices[0].message.content.strip()
 
-        # 🔐 Safe JSON parsing
         try:
-            parsed = json.loads(raw_output)
+            parsed = json.loads(raw)
         except Exception:
             return {
                 "status": "SAFE",
                 "answer": None,
+                "message": None,
                 "sources": [],
                 "supporting_clauses": [],
                 "confidence": "low",
                 "context_used": len(top_chunks),
             }
 
-        # 🔎 Validate cited sources actually exist in context
         valid_paths = {
             chunk["metadata"].get("path")
             for chunk in top_chunks
@@ -197,6 +180,104 @@ class RAGPipeline:
         return {
             "status": "SAFE",
             "answer": parsed.get("answer"),
+            "message": None,
+            "sources": cited_sources,
+            "supporting_clauses": parsed.get("supporting_clauses", []),
+            "confidence": parsed.get("confidence", "low"),
+            "context_used": len(top_chunks),
+        }
+
+    # ==========================================================
+    # POLICY DENIAL GENERATION (Evidence-Backed Refusal)
+    # ==========================================================
+
+    def _generate_policy_denial(
+        self,
+        user_query: str,
+        cleaned_chunks: List[Dict],
+    ) -> Dict[str, Any]:
+
+        if not cleaned_chunks:
+            return {
+                "status": "REFUSED",
+                "answer": None,
+                "message": "This request cannot be fulfilled due to existing policy restrictions.",
+                "sources": [],
+                "supporting_clauses": [],
+                "confidence": "low",
+                "context_used": 0,
+            }
+
+        top_chunks = cleaned_chunks[:5]
+
+        context_blocks = []
+        for chunk in top_chunks:
+            path = chunk["metadata"].get("path", "unknown")
+            text = chunk.get("text", "")
+            context_blocks.append(f"Document: {path}\n{text}")
+
+        context_text = "\n\n---\n\n".join(context_blocks)
+
+        system_prompt = """
+You are a strict policy enforcement assistant.
+
+Return STRICT JSON:
+
+{
+  "message": string,
+  "supporting_clauses": [string],
+  "confidence": "high" | "medium" | "low"
+}
+
+Rules:
+- Identify exact clause enforcing denial.
+- Quote it exactly.
+- Base everything only on context.
+- No extra fields.
+"""
+
+        response = self.client.chat.completions.create(
+            model=self.model,
+            temperature=0,
+            messages=[
+                {"role": "system", "content": system_prompt},
+                {
+                    "role": "user",
+                    "content": f"""
+User Question:
+{user_query}
+
+Context:
+{context_text}
+"""
+                },
+            ],
+        )
+
+        raw = response.choices[0].message.content.strip()
+
+        try:
+            parsed = json.loads(raw)
+        except Exception:
+            return {
+                "status": "REFUSED",
+                "answer": None,
+                "message": "This request cannot be fulfilled due to existing policy restrictions.",
+                "sources": [],
+                "supporting_clauses": [],
+                "confidence": "low",
+                "context_used": len(top_chunks),
+            }
+
+        cited_sources = list({
+            chunk["metadata"].get("path")
+            for chunk in top_chunks
+        })
+
+        return {
+            "status": "REFUSED",
+            "answer": None,
+            "message": parsed.get("message"),
             "sources": cited_sources,
             "supporting_clauses": parsed.get("supporting_clauses", []),
             "confidence": parsed.get("confidence", "low"),
@@ -204,9 +285,12 @@ class RAGPipeline:
         }
 
 
-## for local testing
+# ==========================================================
+# Local Test
+# ==========================================================
+
 if __name__ == "__main__":
-		pipeline = RAGPipeline()
-		test_query = "What is the refund period?"
-		result = pipeline.run(test_query)
-		print(result)
+    pipeline = RAGPipeline()
+    test_query = "Can I get a refund after account termination due to policy violation?"
+    result = pipeline.run(test_query)
+    print(result)
