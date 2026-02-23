@@ -103,24 +103,23 @@ def build_index():
     # DUPLICATE DETECTION
     # -------------------------
     seen_texts = set()
-    seen_paths_spans = set()
+    seen_doc_text_pairs = set()
 
     for idx, chunk in enumerate(embedded_chunks):
 
         text = chunk["text"]
         path = chunk["metadata"].get("path", "")
-        span = chunk["metadata"].get("span", "")
 
-        # Duplicate text check
+        # Exact global duplicate text check
         if text in seen_texts:
             raise RuntimeError(f"Duplicate chunk text detected in {path}")
         seen_texts.add(text)
 
-        # Duplicate structural check (path + span)
-        key = (path, span)
-        if key in seen_paths_spans:
-            raise RuntimeError(f"Duplicate chunk span detected in {path}")
-        seen_paths_spans.add(key)
+        # Duplicate within same document
+        key = (path, text)
+        if key in seen_doc_text_pairs:
+            raise RuntimeError(f"Duplicate chunk detected in {path}")
+        seen_doc_text_pairs.add(key)
 
         vector = np.array(chunk["embedding"]).astype("float32")
 
@@ -158,4 +157,3 @@ def build_index():
 
 if __name__ == "__main__":
     build_index()
-## python -m src.retrieval.index_builder -> to build the index 
