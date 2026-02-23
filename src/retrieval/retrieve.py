@@ -114,6 +114,20 @@ def retrieve_chunks(
     # 3️⃣ Sort by FAISS similarity
     candidates.sort(key=lambda x: x["score"], reverse=True)
 
+    # -------------------------
+    # RETRIEVAL THRESHOLDING -> simple score cutoff to prevent garbage retrievals
+    # (tune MIN_SIMILARITY_SCORE based on eval results)
+    # -------------------------
+    MIN_SIMILARITY_SCORE = 0.25 
+
+    if candidates and candidates[0]["score"] < MIN_SIMILARITY_SCORE:
+        if debug:
+            return {
+                "final_chunks": [],
+                "diagnostics": diagnostics
+            }
+        return []
+
     # ✅ Print ranking before rerank
     print("\nTop candidates after FAISS (before rerank):")
     for i, chunk in enumerate(candidates[:10]):
