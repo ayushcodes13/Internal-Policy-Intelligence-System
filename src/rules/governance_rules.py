@@ -138,17 +138,14 @@ Return JSON only.
     # --------------------------------------------------------
 
     def _resolve(self, signals: Dict) -> GovernanceVerdict:
-        """
-        Applies fixed priority logic.
-        """
 
         if signals.get("is_invalid"):
             return GovernanceVerdict.REFUSE_INVALID
 
-        if signals.get("is_escalation"):
-            return GovernanceVerdict.ESCALATE
-
         if signals.get("is_policy_denial"):
             return GovernanceVerdict.REFUSE_POLICY
+
+        if signals.get("is_escalation"):
+            return GovernanceVerdict.ESCALATE
 
         return GovernanceVerdict.SAFE
