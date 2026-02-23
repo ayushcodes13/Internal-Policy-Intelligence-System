@@ -40,26 +40,26 @@ def run():
     with open("evaluation/test_cases.json", "r") as f:
         test_cases = json.load(f)
 
-    # -------------------------
-    # Retrieval Eval
-    # -------------------------
-    print("\n========== RETRIEVAL EVALUATION ==========\n")
+    # # -------------------------
+    # # Retrieval Eval
+    # # -------------------------
+    # print("\n========== RETRIEVAL EVALUATION ==========\n")
 
-    retrieval_results = evaluate_retrieval(
-        test_cases=test_cases,
-        top_k=5,
-        deduplicate_documents=True   # <-- Added flag for eval-only dedupe
-    )
+    # retrieval_results = evaluate_retrieval(
+    #     test_cases=test_cases,
+    #     top_k=5,
+    #     deduplicate_documents=True   # <-- Added flag for eval-only dedupe
+    # )
 
-    print(f"Total Queries (retrieval evaluated): {retrieval_results['total_queries']}")
-    print(f"Recall@5: {retrieval_results['recall@5']}")
-    print(f"MRR: {retrieval_results['mrr']}")
+    # print(f"Total Queries (retrieval evaluated): {retrieval_results['total_queries']}")
+    # print(f"Recall@5: {retrieval_results['recall@5']}")
+    # print(f"MRR: {retrieval_results['mrr']}")
 
-    # Optional visibility (safe, eval-only insight)
-    if "avg_unique_docs_in_top_k" in retrieval_results:
-        print(f"Avg Unique Docs in Top@5: {retrieval_results['avg_unique_docs_in_top_k']}")
+    # # Optional visibility (safe, eval-only insight)
+    # if "avg_unique_docs_in_top_k" in retrieval_results:
+    #     print(f"Avg Unique Docs in Top@5: {retrieval_results['avg_unique_docs_in_top_k']}")
 
-    print("\n===========================================\n")
+    # print("\n===========================================\n")
 
     # -------------------------
     # End-to-End Eval
