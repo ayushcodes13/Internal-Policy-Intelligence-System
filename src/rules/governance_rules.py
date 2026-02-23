@@ -98,14 +98,29 @@ You must return STRICT JSON with this exact structure:
 {
   "is_invalid": boolean,
   "is_escalation": boolean,
-  "is_policy_denial": boolean
+  "is_policy_denial": boolean,
+  "is_action_request": booleans,
+  "confidence": string
 }
 
 Rules:
 
 - is_invalid = true if query is nonsense, malicious, or unrelated to system domain.
-- is_escalation = true if if the user is reporting an active security issue, legal threat, account compromise, fraud, legal risk, security breach, unusual financial claim, or anything that must be reviewed by a human. Do NOT mark escalation for informational queries discussing policies, processes, or procedures.
+- is_escalation = true ONLY if the user explicitly reports:
+	•	their account was hacked
+	•	unauthorized access occurred
+	•	legal action is being initiated
+	•	financial fraud occurred
+
+Do NOT mark escalation for:
+	•	requests
+	•	complaints
+	•	refund demands
+	•	policy discussions
+	•	asking how to escalate
 - is_policy_denial = true if the user is requesting something that is explicitly not allowed by policy.
+- is_action_request = true if the user is asking the system to perform an action (delete account, issue refund, transfer data, override policy, escalate complaint, etc).
+	•	Do NOT mark informational questions as action requests.
 
 Do NOT explain.
 Do NOT add extra fields.
@@ -131,6 +146,8 @@ Return JSON only.
                 "is_invalid": False,
                 "is_escalation": False,
                 "is_policy_denial": False,
+                "is_action_request": False,
+                "confidence": "low"
             }
 
     # --------------------------------------------------------
@@ -141,14 +158,11 @@ Return JSON only.
         
         if signals.get("is_invalid"):
             return GovernanceVerdict.REFUSE_INVALID
-        
+
         if signals.get("is_policy_denial"):
             return GovernanceVerdict.REFUSE_POLICY
-        
-        if signals.get("is_escalation") and signals.get("confidence") == "low":
-            return GovernanceVerdict.SAFE
-        
-        if signals.get("is_escalation"):
+
+        if signals.get("is_escalation") and signals.get("confidence") != "low":
             return GovernanceVerdict.ESCALATE
-        
+
         return GovernanceVerdict.SAFE
