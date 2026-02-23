@@ -61,45 +61,45 @@ def run():
 
     print("\n===========================================\n")
 
-    # # -------------------------
-    # # End-to-End Eval
-    # # -------------------------
+    # -------------------------
+    # End-to-End Eval
+    # -------------------------
 
-    # total = len(test_cases)
-    # correct = 0
+    total = len(test_cases)
+    correct = 0
 
-    # print("========== END-TO-END EVALUATION ==========\n")
+    print("========== END-TO-END EVALUATION ==========\n")
 
-    # for i, case in enumerate(test_cases, 1):
-    #     query = case["query"]
-    #     expected_verdict = case["expected_verdict"]
+    for i, case in enumerate(test_cases, 1):
+        query = case["query"]
+        expected_verdict = case["expected_verdict"]
 
-    #     result = pipeline.run(query)
+        result = pipeline.run(query)
 
-    #     actual_verdict = result.get("verdict", "UNKNOWN")
+        actual_verdict = result.get("verdict", "UNKNOWN")
 
-    #     passed = actual_verdict == expected_verdict
+        passed = actual_verdict == expected_verdict
 
-    #     if passed:
-    #         correct += 1
+        if passed:
+            correct += 1
 
-    #     print("================================")
-    #     print(f"Test {i}: {query}")
-    #     print(f"Expected Verdict : {expected_verdict}")
-    #     print(f"Actual Verdict   : {actual_verdict}")
-    #     print(f"Final Status     : {result.get('status')}")
-    #     print(f"Confidence       : {result.get('confidence')}")
-    #     print(f"Result           : {'PASS' if passed else 'FAIL'}")
-    #     print("-" * 50)
+        print("================================")
+        print(f"Test {i}: {query}")
+        print(f"Expected Verdict : {expected_verdict}")
+        print(f"Actual Verdict   : {actual_verdict}")
+        print(f"Final Status     : {result.get('status')}")
+        print(f"Confidence       : {result.get('confidence')}")
+        print(f"Result           : {'PASS' if passed else 'FAIL'}")
+        print("-" * 50)
 
-    # accuracy = (correct / total) * 100
+    accuracy = (correct / total) * 100
 
-    # print("\n========== SUMMARY ==========")
-    # print(f"Total Tests : {total}")
-    # print(f"Passed      : {correct}")
-    # print(f"Failed      : {total - correct}")
-    # print(f"Accuracy    : {accuracy:.2f}%")
-    # print("================================\n")
+    print("\n========== SUMMARY ==========")
+    print(f"Total Tests : {total}")
+    print(f"Passed      : {correct}")
+    print(f"Failed      : {total - correct}")
+    print(f"Accuracy    : {accuracy:.2f}%")
+    print("================================\n")
 
 
 if __name__ == "__main__":
