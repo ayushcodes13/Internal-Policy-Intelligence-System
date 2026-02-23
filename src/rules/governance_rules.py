@@ -138,14 +138,17 @@ Return JSON only.
     # --------------------------------------------------------
 
     def _resolve(self, signals: Dict) -> GovernanceVerdict:
-
+        
         if signals.get("is_invalid"):
             return GovernanceVerdict.REFUSE_INVALID
-
+        
         if signals.get("is_policy_denial"):
             return GovernanceVerdict.REFUSE_POLICY
-
+        
+        if signals.get("is_escalation") and signals.get("confidence") == "low":
+            return GovernanceVerdict.SAFE
+        
         if signals.get("is_escalation"):
             return GovernanceVerdict.ESCALATE
-
+        
         return GovernanceVerdict.SAFE
