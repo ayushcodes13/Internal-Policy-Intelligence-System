@@ -104,7 +104,7 @@ You must return STRICT JSON with this exact structure:
 Rules:
 
 - is_invalid = true if query is nonsense, malicious, or unrelated to system domain.
-- is_escalation = true if issue involves fraud, legal risk, security breach, unusual financial claim, or anything that must be reviewed by a human.
+- is_escalation = true if if the user is reporting an active security issue, legal threat, account compromise, fraud, legal risk, security breach, unusual financial claim, or anything that must be reviewed by a human. Do NOT mark escalation for informational queries discussing policies, processes, or procedures.
 - is_policy_denial = true if the user is requesting something that is explicitly not allowed by policy.
 
 Do NOT explain.
