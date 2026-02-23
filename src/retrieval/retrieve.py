@@ -37,9 +37,26 @@ def retrieve_chunks(
 
     with open(METADATA_PATH, "rb") as f:
         metadata_store = pickle.load(f)
-
+        
+    # -------------------------
+    # INDEX INTEGRITY CHECK -> ensures vector count == metadata count
+    # -------------------------
+    if index.ntotal != len(metadata_store):
+        raise RuntimeError(
+            f"Index size mismatch: FAISS has {index.ntotal} vectors "
+            f"but metadata has {len(metadata_store)} entries."
+        )
     # 1️⃣ Embed query
     query_vector = np.array([embed_query(user_query)]).astype("float32")
+    
+    # -------------------------
+    # EMBEDDING DIMENSION CHECK ->you ever change embedding model without rebuilding index,it fails immediately.
+    # -------------------------
+    if query_vector.shape[1] != index.d:
+        raise RuntimeError(
+            f"Embedding dimension mismatch: "
+            f"Query dim {query_vector.shape[1]} vs Index dim {index.d}"
+        )
 
     # 2️⃣ Over-fetch
     overfetch_k = top_k * 8
