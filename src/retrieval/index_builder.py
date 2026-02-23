@@ -66,8 +66,6 @@ def _apply_version_metadata(chunks: List[Dict]) -> List[Dict]:
 
     return enriched_chunks
 
-## Mark newest document: metadata["is_latest"] = True
-## Mark older versions: metadata["is_latest"] = False
 
 def build_index():
 
@@ -87,20 +85,59 @@ def build_index():
     print("Embedding chunks...")
     embedded_chunks = embed_chunks(chunks)
 
+    # -------------------------
+    # SAFETY: Empty embedding check
+    # -------------------------
+    if not embedded_chunks:
+        raise RuntimeError("No chunks were embedded. Cannot build index.")
+
     print("Building FAISS index...")
+
     dimension = len(embedded_chunks[0]["embedding"])
     index = faiss.IndexFlatIP(dimension)
 
     vectors = []
     metadata_store = {}
 
+    # -------------------------
+    # DUPLICATE DETECTION
+    # -------------------------
+    seen_texts = set()
+    seen_paths_spans = set()
+
     for idx, chunk in enumerate(embedded_chunks):
+
+        text = chunk["text"]
+        path = chunk["metadata"].get("path", "")
+        span = chunk["metadata"].get("span", "")
+
+        # Duplicate text check
+        if text in seen_texts:
+            raise RuntimeError(f"Duplicate chunk text detected in {path}")
+        seen_texts.add(text)
+
+        # Duplicate structural check (path + span)
+        key = (path, span)
+        if key in seen_paths_spans:
+            raise RuntimeError(f"Duplicate chunk span detected in {path}")
+        seen_paths_spans.add(key)
+
         vector = np.array(chunk["embedding"]).astype("float32")
+
+        # -------------------------
+        # Embedding dimension validation
+        # -------------------------
+        if len(vector) != dimension:
+            raise RuntimeError(
+                f"Inconsistent embedding dimension detected in {path}. "
+                f"Expected {dimension}, got {len(vector)}"
+            )
 
         # normalize for cosine similarity
         faiss.normalize_L2(vector.reshape(1, -1))
 
         vectors.append(vector)
+
         metadata_store[idx] = {
             "text": chunk["text"],
             "metadata": chunk["metadata"],
@@ -121,6 +158,4 @@ def build_index():
 
 if __name__ == "__main__":
     build_index()
-    
-    
 ## python -m src.retrieval.index_builder -> to build the index 
