@@ -1,5 +1,33 @@
 """
-generate a short readme for what this file do
+Role in simple language: “Given a governance decision, what should the system actually do?”
+
+This file translates a GovernanceVerdict into a real system response.
+
+Example:
+
+If verdict = SAFE  
+→ Generate grounded answer using retrieved chunks.
+
+If verdict = REFUSE_POLICY  
+→ Generate policy-backed denial.
+
+If verdict = ESCALATE  
+→ Stop generation and mark for human review.
+
+If verdict = REFUSE_INVALID  
+→ Return domain refusal message.
+
+It does NOT:
+• Decide the verdict  
+• Retrieve documents  
+• Modify governance logic  
+
+It only routes execution cleanly.
+
+This keeps:
+Decision logic separate from action logic.
+
+Without this layer, escalation, refusal, and answer generation would mix together and break architectural clarity.
 """
 from src.rules.types import GovernanceVerdict
 
