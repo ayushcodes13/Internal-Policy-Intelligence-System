@@ -31,7 +31,6 @@ from src.rules.handlers.verdict_handler import handle_verdict
 from src.utils.logger import StructuredLogger
 import time
 
-
 class RAGPipeline:
 
     def __init__(self):
@@ -157,7 +156,7 @@ class RAGPipeline:
             }
 
         top_chunks = cleaned_chunks[:5]
-    
+
         context_blocks = []
         for chunk in top_chunks:
             path = chunk["metadata"].get("path", "unknown")
