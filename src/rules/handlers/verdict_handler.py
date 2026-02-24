@@ -1,8 +1,6 @@
 """
 generate a short readme for what this file do
 """
-
-
 from src.rules.types import GovernanceVerdict
 
 def handle_verdict(
