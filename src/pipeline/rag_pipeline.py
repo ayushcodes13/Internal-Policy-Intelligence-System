@@ -37,7 +37,7 @@ class RAGPipeline:
         self.logger = StructuredLogger(enable_file_logging=True)
         
         load_dotenv()
-
+        
         self.intent_detector = IntentDetector()
         self.governance = GovernanceEngine()
 
