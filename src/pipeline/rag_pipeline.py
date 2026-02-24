@@ -157,7 +157,7 @@ class RAGPipeline:
             }
 
         top_chunks = cleaned_chunks[:5]
-
+    
         context_blocks = []
         for chunk in top_chunks:
             path = chunk["metadata"].get("path", "unknown")
