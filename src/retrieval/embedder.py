@@ -13,7 +13,6 @@ It's a translator.
 from typing import List, Dict
 from sentence_transformers import SentenceTransformer
 
-# Load model once at import time
 MODEL_NAME = "sentence-transformers/all-MiniLM-L6-v2"
 model = SentenceTransformer(MODEL_NAME)
 
