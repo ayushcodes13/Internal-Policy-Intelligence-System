@@ -9,7 +9,6 @@ No business logic. No intelligence.
 
 It's a translator.
 """
-# src/retrieval/embedder.py
 
 from typing import List, Dict
 from sentence_transformers import SentenceTransformer
