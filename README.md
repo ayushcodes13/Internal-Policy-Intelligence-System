@@ -45,6 +45,8 @@ Lexical Grounding Check
 Structured Response
 ```
 
+<img width="532" height="551" alt="Screenshot 2026-03-02 at 11 08 22 PM" src="https://github.com/user-attachments/assets/14eb2d06-02f0-47b6-9257-52869b0edea5" />
+
 The pipeline enforces strict separation of concerns:
 - **Governance** makes decisions.
 - **Retrieval** fetches context.
