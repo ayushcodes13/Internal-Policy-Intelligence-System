@@ -27,6 +27,7 @@ from src.retrieval.retrieve import retrieve_chunks
 from src.rules.constraint_rules import apply_constraints
 from src.rules.governance_rules import GovernanceEngine
 from src.rules.handlers.verdict_handler import handle_verdict
+from grounding import check_grounding
 
 from src.utils.logger import StructuredLogger
 import time
