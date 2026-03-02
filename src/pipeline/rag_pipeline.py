@@ -357,7 +357,7 @@ Context:
 
 if __name__ == "__main__":
     pipeline = RAGPipeline()
-    test_query = "Can I get a refund after account termination due to policy violation?"
+    test_query = "What is the refund period?"
     result = pipeline.run(test_query)
     print(result)
     
