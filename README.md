@@ -1,5 +1,3 @@
-# Internal Policy Intelligence System
-
 ## Overview
 
 The Internal Policy Intelligence System is a controlled Retrieval-Augmented Generation (RAG) architecture designed for policy-bound internal operations environments.
