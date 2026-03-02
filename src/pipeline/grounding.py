@@ -17,6 +17,12 @@ This is a lexical evidence check.
 
 Purpose:
 To prevent silent hallucinations and ensure answers are grounded in retrieved documents.
+
+Lexical grounding - Checks if the actual words from the answer literally appear in the retrieved documents.
+Word overlap based. Surface-level.
+
+Semantic grounding - Checks if the meaning of the answer is supported by the documents, even if the wording is different.
+Meaning-based. Embedding or model comparison.
 """
 
 from typing import List, Dict
