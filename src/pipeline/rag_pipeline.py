@@ -113,6 +113,20 @@ class RAGPipeline:
             pipeline=self
         )
         result["verdict"] = verdict.name
+        
+        # 7️⃣ Grounding Check (SAFE answers only)
+        if result.get("status") == "SAFE" and result.get("answer"):
+
+            grounding = check_grounding(
+                result["answer"],
+                cleaned_chunks
+            )
+
+            result["hallucination_detected"] = not grounding["grounded"]
+            result["unsupported_clauses"] = grounding["unsupported_sentences"]
+
+            if not grounding["grounded"]:
+                result["confidence"] = "low"
 
         total_time_ms = round((time.time() - start_time) * 1000, 2)
 
