@@ -43,7 +43,7 @@ def embed_chunks(chunks: List[Dict]) -> List[Dict]:
             "embedding": vector.tolist(),  
             "metadata": chunk["metadata"]
         })
-
+    
     return embedded_chunks
 
 def embed_query(question: str) -> List[float]:
