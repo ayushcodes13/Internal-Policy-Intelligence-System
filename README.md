@@ -1,224 +1,169 @@
-# Enterprise SaaS Internal Compliance & IT Operations Knowledge System
-
-**Governed Retrieval-Augmented Generation (RAG) Pipeline**
-
----
+# Internal Policy Intelligence System
 
 ## Overview
 
-This project implements a governed Retrieval-Augmented Generation (RAG) system designed for internal enterprise support operations.
+The Internal Policy Intelligence System is a controlled Retrieval-Augmented Generation (RAG) architecture designed for policy-bound internal operations environments.
 
-The system simulates a production-grade internal knowledge assistant capable of:
+It combines:
+- Deterministic governance gating
+- Version-aware retrieval
+- Owner-scoped access filtering
+- Evidence-backed generation
+- Lexical grounding verification
+- Offline evaluation discipline
 
-- Handling policy and SOP-based queries
-- Enforcing document-level governance
-- Preventing cross-domain leakage
-- Applying structured rule layers before generation
-
-Unlike generic chatbot implementations, this system emphasizes **controlled retrieval**, **rule enforcement**, and **explainable decision layers**.
+This system is designed to prioritize correctness, traceability, and architectural clarity over raw generative capability.
 
 ---
 
 ## System Architecture
+
+### Execution Flow
 
 ```
 User Query
     ↓
 Intent Detection
     ↓
-Routing (Owner-Based Scope)
+Routing (Owner Scoping)
     ↓
-Retrieval (Dense Similarity Search)
+Retrieval (FAISS)
+    • Version dominance (v2 > v1)
+    • Owner filtering
+    • Overfetch + rerank
     ↓
-Constraint Cleaning
+Constraint Filtering
     ↓
-Governance Verdict
+Governance (Risk Gate)
     ↓
-Generation (Placeholder)
+Verdict Handler
+    ↓
+Generation (Strict JSON)
+    ↓
+Lexical Grounding Check
+    ↓
+Structured Response
 ```
 
-Each stage is intentionally separated to ensure:
-
-- **Auditability** – Every decision is traceable
-- **Replaceability** – Components can be swapped independently
-- **Production extensibility** – Easy to add new features
-- **Controlled context usage** – No unfiltered content reaches generation
-
----
-
-## Core Design Principles
-
-### 1. Separation of Concerns
-
-Each component performs exactly one job:
-
-- **Intent detection** labels the query
-- **Routing** determines allowed document owners
-- **Retrieval** selects relevant chunks
-- **Constraint rules** clean unsafe or outdated content
-- **Governance rules** decide escalation or refusal
-- **Generation** produces the final response
+The pipeline enforces strict separation of concerns:
+- **Governance** makes decisions.
+- **Retrieval** fetches context.
+- **Generation** synthesizes.
+- **Grounding** verifies.
+- **Handlers** execute.
 
 No layer mixes responsibilities.
 
-### 2. Owner-Based Isolation
+---
 
-Documents are segmented by metadata:
+## Core Capabilities
 
-- `finance`
-- `security`
-- `ops`
-- etc.
+### Version-Aware Retrieval
+Older document versions are automatically suppressed in favor of the most recent policy version using deterministic dominance rules.
 
-Routing restricts retrieval to allowed owners, preventing cross-domain leakage.
+### Owner-Based Scoping
+Documents are filtered based on routed intent ownership, preventing cross-domain contamination.
 
-### 3. Governance Before Generation
+### Deterministic Governance Gating
+A structured governance layer classifies queries into:
+- `SAFE`
+- `REFUSE_POLICY`
+- `REFUSE_INVALID`
+- `ESCALATE`
 
-Before any response is generated:
+Escalation is strictly limited to security, legal, or compromise cases.
 
-- Outdated documents are removed
-- Internal notes are filtered
-- Conflicts between versions are resolved
-- Escalation and refusal logic is applied
+### Evidence-Backed Refusals
+Policy denials must cite exact clauses from retrieved documents.
 
-The system is designed to **fail safely**, not optimistically.
+### Lexical Grounding Verification
+Generated `SAFE` answers undergo sentence-level lexical grounding checks:
+- Unsupported sentences are flagged.
+- Confidence is downgraded if grounding is weak.
+- Unsupported clauses are logged.
+
+This prevents silent hallucination drift.
+
+### Offline Evaluation Harness
+Retrieval and governance performance are measured using structured test cases.
 
 ---
 
-## Project Structure
+## Evaluation Baseline (Frozen v1)
 
+### Retrieval Evaluation
+| Metric | Value |
+|---|---|
+| Total Queries Evaluated | 18 |
+| Recall@5 | 0.8889 |
+| MRR | 0.5259 |
+
+### Governance Evaluation
+| Metric | Value |
+|---|---|
+| Verdict Accuracy | 85% (20 test cases) |
+
+These metrics represent the frozen v1 baseline. No further tuning was performed after freezing.
+
+---
+
+## Known Limitations
+
+This system intentionally avoids overengineering. Current limitations include:
+
+- Governance is semantic-only and operates at query level.
+- Policy eligibility reasoning (e.g., conditional policy logic) is not implemented.
+- Multi-intent queries may bias dense retrieval toward dominant semantic clusters.
+- Hybrid retrieval (BM25 + vector) is implemented but not enabled.
+- Grounding is lexical, not semantic.
+- No production hardening (rate limiting, async execution, deployment config).
+
+These limitations are explicitly documented to maintain architectural transparency.
+
+---
+
+## Design Principles
+
+This system was built with the following principles:
+- Layered separation of responsibility
+- Deterministic risk control before generation
+- Evidence-backed outputs
+- Measurable performance
+- Minimal hidden logic
+
+The goal is architectural clarity, not maximal feature density.
+
+---
+
+## How to Run
+
+### Build Index
+```bash
+python -m src.retrieval.index_builder
 ```
-data/
-  raw_docs/
-    policies/
-    sops/
-    faqs/
-    notes/
 
-system/
-  intents/
-  routing/
-  retrieval/
-
-src/
-  intent_detection/
-  routing/
-  retrieval/
-    chunker.py
-    embedder.py
-    vector_store.py
-    retrieve.py
-  rules/
-    constraint_rules.py
-    governance_rules.py
-  pipeline/
-    rag_pipeline.py
+### Run Evaluation
+```bash
+python -m evaluation.run_evaluation
 ```
 
----
+### Run Pipeline Locally
+```bash
+python -m src.pipeline.rag_pipeline
+```
 
-## Retrieval Strategy (Current Version)
-
-- Dense embeddings using `sentence-transformers`
-- Cosine similarity ranking
-- Metadata filtering (owner-based scope enforcement)
-- Top-k chunk retrieval
-
-This version uses brute-force similarity. The architecture is designed to allow easy migration to:
-
-- FAISS indexing
-- Hybrid retrieval (BM25 + dense)
-- Cross-encoder reranking
-
-without modifying intent, routing, or rule layers.
+> Ensure `GROQ_API_KEY` is set in your environment.
 
 ---
 
-## Governance Layers
+## What This Project Represents
 
-### Constraint Rules
+This project demonstrates:
+- A layered RAG architecture
+- Version-aware policy retrieval
+- Deterministic governance gating
+- Execution isolation
+- Offline evaluation discipline
+- Basic grounding enforcement
 
-- Remove internal notes
-- Drop outdated policy versions
-- Enforce owner boundaries
-- Clean retrieved context
-
-### Governance Rules
-
-- Detect escalation conditions
-- Identify unsafe or invalid requests
-- Determine final system action
-
-**Possible outcomes:**
-
-- Proceed to generation
-- Escalate to human review
-- Refuse with explanation
-
----
-
-## Current Capabilities
-
-- End-to-end structured RAG flow
-- Metadata-aware retrieval
-- Deterministic rule enforcement
-- Clear architectural boundaries
-- Extendable retrieval layer
-- Modular governance system
-
----
-
-## Future Enhancements (Planned)
-
-- Hybrid retrieval (BM25 + dense fusion)
-- Vector indexing with FAISS
-- Retrieval evaluation metrics
-- Faithfulness scoring
-- Latency and cost logging
-- Reranking with cross-encoders
-
----
-
-## Intended Use Case
-
-This system simulates an internal enterprise support assistant for:
-
-- Policy interpretation
-- Refund and billing queries
-- Security documentation
-- SOP-based workflows
-- Incident handling references
-
-The architecture is domain-agnostic but designed for enterprise environments requiring governance.
-
----
-
-## Why This Project Matters
-
-**This is not a chatbot.**
-
-It is a controlled, governed knowledge retrieval system built with production constraints in mind:
-
-- **Safety over convenience**
-- **Traceability over heuristics**
-- **Modularity over entanglement**
-
-It reflects real-world enterprise AI system design.
-
----
-
-## Getting Started
-
-*(Add installation and usage instructions here)*
-
----
-
-## License
-
-*(Add license information here)*
-
----
-
-## Contact
-
-*(Add contact information here)*
+It is a controlled internal knowledge system, not a generic chatbot wrapper.
