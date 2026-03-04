@@ -54,7 +54,7 @@ def get_pipeline():
 
 
 def main():
-    st.title("🛡️ Internal Policy Intelligence")
+    st.title("Internal Policy Intelligence")
     st.markdown("A highly deterministic, governance-gated knowledge retrieval system.")
 
     pipeline = None
