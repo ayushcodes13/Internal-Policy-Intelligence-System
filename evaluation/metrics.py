@@ -17,6 +17,7 @@ def evaluate_retrieval(
     No generation.
     """
 
+
     total_queries = 0
     recall_hits = 0
     reciprocal_rank_sum = 0.0
