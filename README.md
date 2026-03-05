@@ -1,5 +1,9 @@
 ## Overview
 
+[![Live Demo](https://img.shields.io/badge/Live%20Demo-Streamlit-red?style=for-the-badge&logo=streamlit)](https://policy-intelligence-system.streamlit.app/)
+
+*[Insert Demo Video Placeholder / Replace with Video or GIF later]*
+
 The Internal Policy Intelligence System is a controlled Retrieval-Augmented Generation (RAG) architecture designed for policy-bound internal operations environments.
 
 It combines:
@@ -88,6 +92,9 @@ Generated `SAFE` answers undergo sentence-level lexical grounding checks:
 
 This prevents silent hallucination drift.
 
+### Interactive Dashboard & Document Viewer
+A responsive web interface provides basic session-based rate limiting, real-time metrics visibility (confidence, verdicts, execution latency), and an interactive document explorer for direct comparison against raw markdown policies.
+
 ### Offline Evaluation Harness
 Retrieval and governance performance are measured using structured test cases.
 
@@ -120,7 +127,7 @@ This system intentionally avoids overengineering. Current limitations include:
 - Multi-intent queries may bias dense retrieval toward dominant semantic clusters.
 - Hybrid retrieval (BM25 + vector) is implemented but not enabled.
 - Grounding is lexical, not semantic.
-- No production hardening (rate limiting, async execution, deployment config).
+- No production hardening for the core pipeline (async execution, deployment config). The Streamlit frontend uses a simple in-memory session state for basic spam prevention instead of a distributed backend.
 
 These limitations are explicitly documented to maintain architectural transparency.
 
@@ -157,6 +164,11 @@ python -m src.pipeline.rag_pipeline
 ```
 
 > Ensure `GROQ_API_KEY` is set in your environment.
+
+### Run Streamlit Frontend Locally
+```bash
+./run_app.sh
+```
 
 ---
 
