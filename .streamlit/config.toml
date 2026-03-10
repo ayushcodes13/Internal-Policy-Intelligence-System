@@ -1,0 +1,7 @@
+[theme]
+primaryColor = "#d4af37" # Gold/Yellowish
+backgroundColor = "#fffdf0" # Very pale yellow/warm white
+secondaryBackgroundColor = "#f5f0d5" # Warmer slightly darker yellow for sidebar
+textColor = "#333333" # Dark grey for readability
+font = "sans serif"
+
