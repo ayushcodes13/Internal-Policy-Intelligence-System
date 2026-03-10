@@ -1,0 +1,10 @@
+source_type: note <br>
+owner: ops <br>
+last_updated: 2023-04
+
+These are internal working guidelines and not final policy.
+
+- Refund timelines are still under discussion for enterprise customers.
+- Legal suggested shortening refund windows, but no decision yet.
+- Support may approve goodwill refunds in rare cases.
+- This document should not be referenced externally.

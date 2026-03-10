@@ -1,0 +1,6 @@
+streamlit
+groq
+python-dotenv
+faiss-cpu
+numpy
+sentence-transformers

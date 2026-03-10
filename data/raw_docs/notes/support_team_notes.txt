@@ -1,0 +1,10 @@
+source_type: note
+owner: support
+last_updated: 2023-05
+
+Support team internal notes.
+
+- Customers often reference old refund terms from marketing emails.
+- Avoid promising timelines unless confirmed by ops.
+- Escalate immediately if customer threatens legal action.
+- Billing disputes usually calm down if partial credit is offered.
