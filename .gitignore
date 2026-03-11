@@ -209,3 +209,4 @@ __marimo__/
 
 # Runtime logs
 logs/
+.DS_Store
