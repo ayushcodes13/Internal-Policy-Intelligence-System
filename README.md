@@ -5,10 +5,12 @@
 *A Deterministic, Governance-Gated Retrieval-Augmented Generation (RAG) Architecture for Enterprise Operations.*
 
 [![Live Demo](https://img.shields.io/badge/Live%20Demo-Streamlit-red?style=for-the-badge&logo=streamlit)](https://policy-intelligence-system.streamlit.app/)
-[![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg?style=for-the-badge&logo=python&logoColor=white)](https://www.python.org)
-[![Groq API](https://img.shields.io/badge/Groq-Llama_3-f57f17?style=for-the-badge)](https://groq.com/)
-[![FAISS](https://img.shields.io/badge/Vector_Store-FAISS-2b3137?style=for-the-badge)](#)
 [![License: MIT](https://img.shields.io/badge/License-MIT-success.svg?style=for-the-badge)](https://opensource.org/licenses/MIT)
+[![YouTube Demo](https://img.shields.io/badge/YouTube-Demo-FF0000?style=for-the-badge&logo=youtube&logoColor=white)](https://youtu.be/1CQHnX7YS34?si=_5QQKivgDXuioTXz)
+<br>
+[![FAISS](https://img.shields.io/badge/Vector_Store-FAISS-2b3137?style=for-the-badge)](#)
+[![Groq API](https://img.shields.io/badge/Groq-Llama_3-f57f17?style=for-the-badge)](https://groq.com/)
+[![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg?style=for-the-badge&logo=python&logoColor=white)](https://www.python.org)
 
 </div>
 
