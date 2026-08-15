@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="docs/assets/canon-logo.svg" alt="CANON logo" width="120" />
+<img src="public/canon-logo.svg" alt="CANON logo" width="120" />
 
 # CANON
 
