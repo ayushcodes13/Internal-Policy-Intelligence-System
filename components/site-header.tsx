@@ -4,7 +4,14 @@ export function SiteHeader() {
   return (
     <header className="site-header">
       <a className="brand" href="#top" aria-label={`${productConfig.name} home`}>
-        <span className="brand-symbol">{productConfig.mark}</span>
+        <img
+          className="brand-logo"
+          src="/canon-logo.svg"
+          alt=""
+          width="34"
+          height="34"
+          aria-hidden="true"
+        />
         <span>{productConfig.name}</span>
       </a>
 

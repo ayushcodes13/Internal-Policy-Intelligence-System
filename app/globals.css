@@ -101,16 +101,11 @@ p {
   font-weight: 800;
 }
 
-.brand-symbol {
-  display: grid;
+.brand-logo {
   width: 34px;
   height: 34px;
-  place-items: center;
   border-radius: 9px;
-  background: var(--ink);
-  color: white;
-  font-size: 0.75rem;
-  letter-spacing: 0;
+  box-shadow: 0 10px 30px rgba(27, 27, 24, 0.16);
 }
 
 .nav-links {

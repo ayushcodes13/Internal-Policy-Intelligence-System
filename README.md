@@ -21,7 +21,7 @@
 
 ---
 
-<img src="docs/assets/canon-product-preview.svg" alt="CANON product interface preview" width="100%" />
+<img src="docs/assets/canon-home.jpg" alt="CANON homepage showing the policy-governed intelligence interface" width="100%" />
 
 ## Overview
 
@@ -35,7 +35,7 @@ CANON can currently answer from the included markdown policy corpus, return sour
 
 ## Demo
 
-<img src="docs/assets/canon-workflow.svg" alt="CANON workflow from query to governed answer" width="100%" />
+<img src="docs/assets/canon-console.jpg" alt="CANON live policy console with sample questions and query input" width="100%" />
 
 ```text
 Question
@@ -92,7 +92,7 @@ Example response shape:
 
 ## Architecture
 
-<img src="docs/assets/canon-architecture.svg" alt="CANON architecture diagram" width="100%" />
+<img src="docs/assets/canon-architecture-section.jpg" alt="CANON architecture section showing governance features and system metrics" width="100%" />
 
 ```text
 Browser
@@ -254,11 +254,11 @@ docs/
 
 ## Screenshots
 
-<img src="docs/assets/canon-product-preview.svg" alt="CANON product screenshot mock" width="100%" />
+<img src="docs/assets/canon-home.jpg" alt="CANON live homepage screenshot" width="100%" />
 
-<img src="docs/assets/canon-workflow.svg" alt="CANON workflow screenshot" width="100%" />
+<img src="docs/assets/canon-console.jpg" alt="CANON live console screenshot" width="100%" />
 
-<img src="docs/assets/canon-architecture.svg" alt="CANON architecture screenshot" width="100%" />
+<img src="docs/assets/canon-architecture-section.jpg" alt="CANON live architecture screenshot" width="100%" />
 
 ## Deployment
 

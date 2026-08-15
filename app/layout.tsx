@@ -4,7 +4,12 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: productConfig.name,
-  description: productConfig.description
+  description: productConfig.description,
+  icons: {
+    icon: "/icon.svg",
+    shortcut: "/icon.svg",
+    apple: "/canon-logo.svg"
+  }
 };
 
 export default function RootLayout({
