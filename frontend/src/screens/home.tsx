@@ -30,19 +30,19 @@ export function HomePage() {
         </Button>
       </header>
 
-      <section id="top" className="mx-auto grid w-[min(1120px,calc(100%-32px))] grid-cols-[minmax(0,1fr)_minmax(420px,0.92fr)] items-center gap-10 py-20 max-lg:grid-cols-1">
-        <div>
+      <section id="top" className="mx-auto flex w-[min(1120px,calc(100%-32px))] flex-col items-center gap-10 py-20">
+        <div className="flex max-w-5xl flex-col items-center text-center">
           <div className="inline-flex items-center gap-3 rounded-full border border-[var(--line)] bg-[var(--soft)] px-3 py-2 text-sm font-bold text-[var(--muted)]">
             <span className="rounded-full bg-emerald-100 px-2 py-1 text-xs uppercase text-emerald-700">New</span>
             Python AI backend with a TanStack frontend
           </div>
-          <h1 className="mt-6 max-w-[680px] text-6xl font-black leading-[0.94] tracking-normal text-balance max-sm:text-5xl">
+          <h1 className="mt-6 max-w-5xl text-7xl font-black leading-[0.95] tracking-normal text-balance max-lg:text-6xl max-sm:text-5xl">
             {productConfig.tagline}
           </h1>
-          <p className="mt-6 max-w-[620px] text-xl leading-8 text-[var(--muted)]">
+          <p className="mt-6 max-w-3xl text-xl leading-8 text-[var(--muted)]">
             {productConfig.description}
           </p>
-          <div className="mt-8 flex flex-wrap gap-3">
+          <div className="mt-8 flex flex-wrap justify-center gap-3">
             <Button asChild size="lg">
               <a href="#console">Run a policy query</a>
             </Button>
@@ -50,7 +50,7 @@ export function HomePage() {
               <a href="#architecture">View architecture</a>
             </Button>
           </div>
-          <div className="mt-7 flex flex-wrap gap-2">
+          <div className="mt-7 flex flex-wrap justify-center gap-2">
             {productConfig.heroChips.map((chip) => (
               <span className="rounded-full border border-[var(--line)] bg-white px-4 py-2 text-sm font-medium text-[var(--muted)]" key={chip}>
                 {chip}
@@ -58,14 +58,14 @@ export function HomePage() {
             ))}
           </div>
         </div>
-        <div className="rounded-3xl border border-[var(--line)] bg-white shadow-2xl shadow-black/10">
+        <div className="w-full max-w-4xl rounded-3xl border border-[var(--line)] bg-white shadow-2xl shadow-black/10">
           <div className="flex items-center gap-2 border-b border-[var(--line)] px-5 py-4">
             <span className="h-3 w-3 rounded-full bg-rose-500" />
             <span className="h-3 w-3 rounded-full bg-amber-500" />
             <span className="h-3 w-3 rounded-full bg-emerald-600" />
             <span className="ml-auto font-mono text-xs text-[var(--muted)]">policy.query</span>
           </div>
-          <pre className="min-h-[380px] overflow-auto p-7 font-mono text-sm leading-7 text-[var(--ink)]">{`POST /api/query
+          <pre className="min-h-[340px] overflow-auto p-7 font-mono text-sm leading-7 text-[var(--ink)]">{`POST /api/query
 
 intent: refund_query
 owners: finance
