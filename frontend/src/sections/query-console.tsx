@@ -1,0 +1,161 @@
+import { useMutation } from "@tanstack/react-query";
+import { Loader2, SendHorizontal } from "lucide-react";
+import { useState } from "react";
+import { fetchPolicyQuery } from "../lib/api";
+import { productConfig } from "../lib/product";
+import type { PipelineResult } from "../lib/types";
+import { Button } from "../components/ui/button";
+
+export function QueryConsole() {
+  const [query, setQuery] = useState("");
+  const mutation = useMutation<PipelineResult, Error, string>({
+    mutationFn: fetchPolicyQuery
+  });
+
+  function submit(nextQuery = query) {
+    const trimmed = nextQuery.trim();
+    if (!trimmed || mutation.isPending) {
+      return;
+    }
+    mutation.mutate(trimmed);
+  }
+
+  return (
+    <section id="console" className="mx-auto w-[min(1120px,calc(100%-32px))] py-20">
+      <div className="max-w-3xl">
+        <p className="eyebrow">Live Console</p>
+        <h2 className="section-title">Run the governed retrieval flow.</h2>
+        <p className="mt-4 text-lg leading-8 text-[var(--muted)]">
+          Use a sample or ask your own question. The response shows status,
+          verdict, confidence, cited documents, and grounding signals.
+        </p>
+      </div>
+
+      <div className="mt-8 grid grid-cols-[300px_minmax(0,1fr)] gap-5 max-lg:grid-cols-1">
+        <aside className="card self-start p-4">
+          <p className="mb-3 text-xs font-black uppercase text-[var(--muted)]">Samples</p>
+          <div className="grid gap-2">
+            {productConfig.sampleQueries.map((sample) => (
+              <button
+                className="rounded-2xl bg-white p-4 text-left leading-6 hover:ring-2 hover:ring-[var(--ink)]"
+                key={sample}
+                type="button"
+                onClick={() => {
+                  setQuery(sample);
+                  submit(sample);
+                }}
+              >
+                {sample}
+              </button>
+            ))}
+          </div>
+        </aside>
+
+        <section className="min-w-0">
+          <form
+            className="card mb-4 p-4"
+            onSubmit={(event) => {
+              event.preventDefault();
+              submit();
+            }}
+          >
+            <label className="mb-2 block text-xs font-black uppercase text-[var(--muted)]" htmlFor="policy-query">
+              Policy Query
+            </label>
+            <div className="grid grid-cols-[minmax(0,1fr)_112px] gap-3 max-sm:grid-cols-1">
+              <input
+                id="policy-query"
+                className="min-h-12 min-w-0 rounded-2xl border border-[var(--line)] bg-[var(--soft)] px-4 outline-none focus:border-violet-700 focus:bg-white"
+                value={query}
+                onChange={(event) => setQuery(event.target.value)}
+                placeholder="Ask about refunds, account closure, access, security, or support process."
+              />
+              <Button type="submit" disabled={mutation.isPending || !query.trim()}>
+                {mutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <SendHorizontal className="h-4 w-4" />}
+                Run
+              </Button>
+            </div>
+          </form>
+
+          <ResultPanel result={mutation.data} error={mutation.error?.message} loading={mutation.isPending} />
+        </section>
+      </div>
+    </section>
+  );
+}
+
+function ResultPanel({
+  result,
+  error,
+  loading
+}: {
+  result?: PipelineResult;
+  error?: string;
+  loading: boolean;
+}) {
+  if (loading) {
+    return <div className="result-zone grid place-items-center text-[var(--muted)]">Running Python governance pipeline...</div>;
+  }
+
+  if (error) {
+    return (
+      <div className="result-zone border-rose-300 bg-rose-50">
+        <h3 className="text-xl font-black text-rose-900">Request failed</h3>
+        <p className="mt-2 text-rose-800">{error}</p>
+      </div>
+    );
+  }
+
+  if (!result) {
+    return (
+      <div className="result-zone grid place-items-center text-center text-[var(--muted)]">
+        <div>
+          <h3 className="text-xl font-black text-[var(--ink)]">Ready</h3>
+          <p className="mt-2">Submit a policy question to run the governance pipeline.</p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="result-zone">
+      <div className="grid grid-cols-4 gap-3 max-md:grid-cols-2">
+        {[
+          ["Status", result.status],
+          ["Verdict", result.verdict],
+          ["Confidence", result.confidence],
+          ["Context", String(result.context_used)]
+        ].map(([label, value]) => (
+          <div className="rounded-2xl border border-[var(--line)] bg-[var(--soft)] p-4" key={label}>
+            <span className="block text-xs font-black uppercase text-[var(--muted)]">{label}</span>
+            <strong className="mt-2 block break-words">{value}</strong>
+          </div>
+        ))}
+      </div>
+
+      <article className="mt-4 rounded-2xl border border-[var(--line)] bg-white p-5">
+        <h3 className="text-lg font-black">Response</h3>
+        <p className="mt-3 whitespace-pre-wrap leading-7 text-[var(--muted)]">
+          {result.answer || result.message || "No answer returned."}
+        </p>
+      </article>
+
+      <div className="mt-4 grid grid-cols-2 gap-4 max-lg:grid-cols-1">
+        <article className="rounded-2xl border border-[var(--line)] bg-white p-5">
+          <h3 className="text-lg font-black">Sources</h3>
+          <ul className="mt-3 list-disc pl-5 text-sm leading-7 text-[var(--muted)]">
+            {result.sources.length ? result.sources.map((source) => <li key={source}>{source}</li>) : <li>No cited source.</li>}
+          </ul>
+        </article>
+        <article className="rounded-2xl border border-[var(--line)] bg-white p-5">
+          <h3 className="text-lg font-black">Supporting clauses</h3>
+          <ul className="mt-3 list-disc pl-5 text-sm leading-7 text-[var(--muted)]">
+            {result.supporting_clauses.length
+              ? result.supporting_clauses.map((clause) => <li key={clause}>{clause}</li>)
+              : <li>No supporting clauses returned.</li>}
+          </ul>
+        </article>
+      </div>
+    </div>
+  );
+}

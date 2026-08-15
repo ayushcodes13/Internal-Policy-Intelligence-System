@@ -4,18 +4,17 @@ This repository is **CANON**, a governance-gated policy intelligence system. Tre
 
 ## Current Production Path
 
-The production app is the Next.js/Vercel/Cloudflare path:
+The production app is the Vite/TanStack frontend plus Python API path:
 
 ```text
-app/                  Next.js App Router pages and API routes
-components/           React UI components
-config/product.ts     Brand, copy, domains, and sample prompts
-lib/                  TypeScript runtime pipeline
-scripts/              Build-time indexing tools
+frontend/             React 19, TanStack Router, TanStack Query, Vite
+frontend/src/lib/     Browser-only types, product config, API client
+frontend/src/ui/      shadcn-style local UI components
+api/                  Python API, policy pipeline, Gemini index builder
 docs/                 Architecture and deployment documentation
 ```
 
-The legacy Python/Streamlit path remains for reference only:
+The legacy Streamlit path remains for reference only:
 
 ```text
 app.py
@@ -25,7 +24,7 @@ run_app.sh
 data/index/
 ```
 
-Do not add new production behavior to the legacy Python path unless the task explicitly asks for Streamlit or offline Python work.
+Do not add new production behavior to `app.py` or the old `src/` Streamlit pipeline unless the task explicitly asks for Streamlit maintenance.
 
 ## Product Principles
 
@@ -42,26 +41,28 @@ The live query flow is:
 
 ```text
 Browser
-  -> POST /api/query
-  -> Groq intent detection
+  -> Vite React UI
+  -> TanStack Query mutation
+  -> Python POST /api/query
+  -> Python Groq intent detection
   -> deterministic owner routing
-  -> Gemini query embedding
+  -> Python Gemini query embedding
   -> cosine retrieval over data/search-index.json
   -> owner/latest-version constraints
-  -> Groq governance classification
-  -> Groq answer or refusal generation
+  -> Python Groq governance classification
+  -> Python Groq answer or refusal generation
   -> lexical grounding check
   -> JSON response
 ```
 
 Key files:
 
-- `app/api/query/route.ts` validates request input and returns pipeline output.
-- `lib/pipeline.ts` owns intent detection, routing, constraints, governance, generation, and grounding orchestration.
-- `lib/retrieval.ts` loads `data/search-index.json` and scores chunks.
-- `lib/gemini.ts` calls Gemini embeddings and normalizes vectors.
-- `lib/groq.ts` calls Groq with JSON response mode.
-- `scripts/build-search-index.mjs` generates the static embedding index.
+- `frontend/src/screens/home.tsx` owns the main UI.
+- `frontend/src/sections/query-console.tsx` owns the live query console.
+- `frontend/src/lib/api.ts` calls the Python API.
+- `api/main.py` validates request input and returns pipeline output.
+- `api/pipeline.py` owns intent detection, routing, constraints, governance, generation, and grounding orchestration.
+- `api/build_search_index.py` generates the static embedding index.
 
 ## Environment Variables
 
@@ -87,33 +88,18 @@ Use the repo's Node package manager setup. In this Codex environment, system `np
 
 ```bash
 pnpm install
+pip install -r requirements.txt
 pnpm run build:index
+pnpm run dev:api
 pnpm run dev
-pnpm exec next build
-pnpm run cf:build
+pnpm run build
 ```
 
 `npm run build:index` or `pnpm run build:index` requires `GEMINI_API_KEY`.
 
 ## Deployment
 
-Vercel is supported through the standard Next.js build.
-
-Cloudflare Workers is supported through OpenNext:
-
-```bash
-pnpm run cf:build
-pnpm run cf:preview
-pnpm run cf:deploy
-```
-
-The intended free Cloudflare hostname is:
-
-```text
-canon-policy.<your-cloudflare-subdomain>.workers.dev
-```
-
-See `docs/DOMAINS.md` before changing domain strategy.
+Deploy the `dist/` static frontend and host `api.main:app` on a Python service. Set `VITE_API_BASE_URL` when the frontend and backend are on different origins.
 
 ## Frontend Guidelines
 
@@ -121,18 +107,18 @@ See `docs/DOMAINS.md` before changing domain strategy.
 - Prefer dense, credible operational UI over decorative marketing sections.
 - Keep cards at `16px` radius or below unless there is a strong visual reason.
 - Keep text readable on mobile; avoid fixed-width content that can overflow.
-- Use `config/product.ts` for product name, tagline, domains, and sample prompts.
+- Use `frontend/src/lib/product.ts` for product name, tagline, domains, and sample prompts.
 - Do not hardcode `CANON` or the brand mark in components if it can come from config.
 
 ## Code Guidelines
 
-- Keep API contracts typed with `lib/types.ts`.
+- Keep browser API contracts typed with `frontend/src/lib/types.ts`.
 - Keep browser-only code out of server-only modules.
-- Keep secret usage server-side only.
+- Keep secret usage in Python only.
 - Keep generated retrieval indexes separate from raw policy documents.
 - Prefer simple deterministic code over clever abstractions for policy gates.
-- If changing document metadata semantics, update `scripts/build-search-index.mjs`, `lib/retrieval.ts`, and the docs together.
-- If changing output shape, update `PipelineResult`, `ResultPanel`, README examples, and any tests or scripts together.
+- If changing document metadata semantics, update `api/build_search_index.py`, `api/pipeline.py`, and the docs together.
+- If changing output shape, update Python responses, `PipelineResult`, `ResultPanel`, README examples, and any tests together.
 
 ## Git Hygiene
 
@@ -146,13 +132,7 @@ See `docs/DOMAINS.md` before changing domain strategy.
 Before handing off code changes:
 
 ```bash
-pnpm exec next build
-```
-
-When Cloudflare deploy config changes:
-
-```bash
-pnpm run cf:build
+pnpm run build
 ```
 
 When retrieval docs change:

@@ -1,6 +1,4 @@
-streamlit
-groq
+fastapi
+uvicorn[standard]
 python-dotenv
-faiss-cpu
 numpy
-sentence-transformers
