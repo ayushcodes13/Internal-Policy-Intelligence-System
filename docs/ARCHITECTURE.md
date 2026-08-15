@@ -8,6 +8,12 @@ app/
   layout.tsx                App metadata and shell
   page.tsx                  Thin client controller
 components/                 UI components only
+  hero-section.tsx          Crucible-inspired product hero and code preview
+  product-sections.tsx      Product, workflow, architecture, and docs bands
+  query-composer.tsx        Live query input
+  result-panel.tsx          Answer, refusal, evidence, and warning output
+  site-header.tsx           Sticky top navigation
+  status-metrics.tsx        Status, verdict, confidence, and source metrics
 config/product.ts           Product name, copy, domains, sample prompts
 lib/
   client/query-client.ts    Browser API client
