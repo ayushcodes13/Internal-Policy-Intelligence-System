@@ -1,6 +1,6 @@
-# PolicyLens
+# CANON
 
-PolicyLens is a governance-gated policy intelligence system for teams that need internal policy answers with traceable evidence. It routes each question through intent detection, owner scoping, retrieval, governance classification, source-backed generation, and lexical grounding before returning an answer.
+CANON is a governance-gated policy intelligence system for teams that need internal policy answers with traceable evidence. It routes each question through intent detection, owner scoping, retrieval, governance classification, source-backed generation, and lexical grounding before returning an answer.
 
 The current production app is a **Vercel-ready Next.js application**. The older Streamlit/FAISS Python implementation is preserved only as a reference path.
 
@@ -44,7 +44,7 @@ The original app was built with Streamlit, FAISS, and local SentenceTransformers
 - serverless functions should not depend on local model warmup for every cold start.
 - local JSONL logging is not durable in a serverless environment.
 
-PolicyLens now keeps the same governance idea but moves heavy embedding work out of the request runtime.
+CANON now keeps the same governance idea but moves heavy embedding work out of the request runtime.
 
 ## Tech Stack
 

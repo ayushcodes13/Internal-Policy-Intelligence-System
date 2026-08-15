@@ -4,7 +4,7 @@ export function SiteHeader() {
   return (
     <header className="site-header">
       <a className="brand" href="#top" aria-label={`${productConfig.name} home`}>
-        <span className="brand-symbol">PL</span>
+        <span className="brand-symbol">{productConfig.mark}</span>
         <span>{productConfig.name}</span>
       </a>
 

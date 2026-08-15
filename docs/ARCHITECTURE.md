@@ -1,4 +1,4 @@
-# PolicyLens Architecture
+# CANON Architecture
 
 ## Production App
 

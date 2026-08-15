@@ -2,7 +2,7 @@ import { productConfig } from "../config/product";
 
 export function TrustStrip() {
   return (
-    <section className="trust-strip" aria-label="PolicyLens operating promises">
+    <section className="trust-strip" aria-label="CANON operating promises">
       <span>Built for teams that cannot afford guesswork</span>
       <span>Source citations</span>
       <span>Structured verdicts</span>
@@ -66,7 +66,7 @@ export function WorkflowSection() {
         <p className="eyebrow">Workflow</p>
         <h2>Ask anything. Answer only when the evidence is good.</h2>
         <p>
-          PolicyLens separates routing, retrieval, governance, generation, and
+          CANON separates routing, retrieval, governance, generation, and
           grounding so every response has an audit trail.
         </p>
       </div>

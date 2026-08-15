@@ -27,7 +27,7 @@ export function HeroSection() {
         </div>
       </div>
 
-      <div className="hero-visual" aria-label="PolicyLens governance preview">
+      <div className="hero-visual" aria-label="CANON governance preview">
         <div className="terminal-window">
           <div className="terminal-topbar">
             <span />
