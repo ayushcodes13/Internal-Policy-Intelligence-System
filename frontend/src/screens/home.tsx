@@ -13,10 +13,15 @@ const metricData = [
 export function HomePage() {
   return (
     <main className="min-h-screen bg-[var(--bg)] text-[var(--ink)]">
-      <header className="sticky top-3 z-30 mx-auto grid w-[min(1120px,calc(100%-32px))] grid-cols-[1fr_auto_1fr] items-center rounded-2xl border border-[var(--line)] bg-white/85 p-2 shadow-lg shadow-black/5 backdrop-blur max-md:grid-cols-[1fr_auto]">
-        <a className="flex items-center gap-3 font-black" href="#top">
-          <img src="/canon-logo.svg" alt="" className="h-9 w-9 rounded-xl shadow-md" />
-          <span>{productConfig.name}</span>
+      <header className="sticky top-3 z-30 mx-auto grid w-[min(1120px,calc(100%-32px))] grid-cols-[1fr_auto_1fr] items-center rounded-2xl border border-[var(--line)] bg-white/90 p-2 shadow-lg shadow-black/5 backdrop-blur max-md:grid-cols-[1fr_auto]">
+        <a className="flex items-center gap-3 font-black" href="#top" aria-label="CANON home">
+          <span className="grid h-11 w-11 place-items-center rounded-2xl border border-[#d8c58a]/50 bg-[#0b0f14] shadow-md">
+            <img src="/canon-logo.svg" alt="" className="h-9 w-9 rounded-xl" />
+          </span>
+          <span className="leading-tight">
+            <span className="block">{productConfig.name}</span>
+            <span className="block text-xs font-bold text-[var(--muted)] max-sm:hidden">Policy-governed AI</span>
+          </span>
         </a>
         <nav className="flex rounded-full border border-[var(--line)] bg-[var(--soft)] p-1 text-sm font-bold text-[var(--muted)] max-md:hidden">
           {productConfig.navItems.map((item) => (
@@ -30,19 +35,20 @@ export function HomePage() {
         </Button>
       </header>
 
-      <section id="top" className="mx-auto flex w-[min(1120px,calc(100%-32px))] flex-col items-center gap-10 py-20">
+      <section id="top" className="mx-auto flex w-[min(1120px,calc(100%-32px))] scroll-mt-28 flex-col items-center gap-7 py-12">
         <div className="flex max-w-5xl flex-col items-center text-center">
           <div className="inline-flex items-center gap-3 rounded-full border border-[var(--line)] bg-[var(--soft)] px-3 py-2 text-sm font-bold text-[var(--muted)]">
+            <img src="/canon-logo.svg" alt="" className="h-6 w-6 rounded-lg" />
             <span className="rounded-full bg-emerald-100 px-2 py-1 text-xs uppercase text-emerald-700">New</span>
             Python AI backend with a TanStack frontend
           </div>
-          <h1 className="mt-6 max-w-5xl text-7xl font-black leading-[0.95] tracking-normal text-balance max-lg:text-6xl max-sm:text-5xl">
+          <h1 className="mt-5 max-w-5xl text-7xl font-black leading-[0.95] tracking-normal text-balance max-lg:text-6xl max-sm:text-5xl">
             {productConfig.tagline}
           </h1>
-          <p className="mt-6 max-w-3xl text-xl leading-8 text-[var(--muted)]">
+          <p className="mt-5 max-w-3xl text-xl leading-8 text-[var(--muted)]">
             {productConfig.description}
           </p>
-          <div className="mt-8 flex flex-wrap justify-center gap-3">
+          <div className="mt-7 flex flex-wrap justify-center gap-3">
             <Button asChild size="lg">
               <a href="#console">Run a policy query</a>
             </Button>
@@ -50,7 +56,7 @@ export function HomePage() {
               <a href="#architecture">View architecture</a>
             </Button>
           </div>
-          <div className="mt-7 flex flex-wrap justify-center gap-2">
+          <div className="mt-6 flex flex-wrap justify-center gap-2">
             {productConfig.heroChips.map((chip) => (
               <span className="rounded-full border border-[var(--line)] bg-white px-4 py-2 text-sm font-medium text-[var(--muted)]" key={chip}>
                 {chip}
@@ -58,7 +64,7 @@ export function HomePage() {
             ))}
           </div>
         </div>
-        <div className="w-full max-w-4xl rounded-3xl border border-[var(--line)] bg-white shadow-2xl shadow-black/10">
+        <div className="w-full max-w-4xl rounded-3xl border border-[var(--line)] bg-white shadow-xl shadow-black/10">
           <div className="flex items-center gap-2 border-b border-[var(--line)] px-5 py-4">
             <span className="h-3 w-3 rounded-full bg-rose-500" />
             <span className="h-3 w-3 rounded-full bg-amber-500" />
