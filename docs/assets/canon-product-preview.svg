@@ -1,0 +1,40 @@
+<svg width="1280" height="720" viewBox="0 0 1280 720" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc">
+  <title id="title">CANON product preview</title>
+  <desc id="desc">A dark product interface showing a policy query, governance verdict, evidence, and workflow metrics.</desc>
+  <rect width="1280" height="720" rx="32" fill="#0B0F14"/>
+  <rect x="28" y="28" width="1224" height="664" rx="26" fill="#101820" stroke="#263443"/>
+  <rect x="62" y="62" width="1156" height="56" rx="16" fill="#131E28"/>
+  <circle cx="92" cy="90" r="12" fill="#D8C58A"/>
+  <text x="122" y="98" fill="#F4F0E6" font-family="Inter, Arial, sans-serif" font-size="24" font-weight="700">CANON</text>
+  <text x="220" y="98" fill="#98A6B3" font-family="Inter, Arial, sans-serif" font-size="15">Policy-governed intelligence</text>
+  <rect x="1008" y="76" width="82" height="28" rx="14" fill="#1B2A36"/>
+  <text x="1027" y="96" fill="#D8C58A" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="700">SAFE</text>
+  <rect x="1104" y="76" width="82" height="28" rx="14" fill="#251B20"/>
+  <text x="1120" y="96" fill="#F49A7A" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="700">ESCALATE</text>
+  <text x="72" y="180" fill="#F4F0E6" font-family="Inter, Arial, sans-serif" font-size="52" font-weight="800">Answers that obey the policy.</text>
+  <text x="72" y="222" fill="#AEB9C4" font-family="Inter, Arial, sans-serif" font-size="20">Route the owner, retrieve the canonical rule, enforce constraints, then respond.</text>
+  <rect x="72" y="282" width="526" height="312" rx="20" fill="#141F29" stroke="#2C3B49"/>
+  <text x="104" y="330" fill="#D8C58A" font-family="Inter, Arial, sans-serif" font-size="14" font-weight="700">POLICY QUERY</text>
+  <rect x="104" y="358" width="430" height="86" rx="14" fill="#0C1218" stroke="#334554"/>
+  <text x="128" y="394" fill="#F4F0E6" font-family="Inter, Arial, sans-serif" font-size="21" font-weight="700">Can support override the refund</text>
+  <text x="128" y="424" fill="#F4F0E6" font-family="Inter, Arial, sans-serif" font-size="21" font-weight="700">deadline for a customer?</text>
+  <rect x="104" y="472" width="132" height="42" rx="21" fill="#D8C58A"/>
+  <text x="136" y="499" fill="#0B0F14" font-family="Inter, Arial, sans-serif" font-size="14" font-weight="800">Ask CANON</text>
+  <rect x="250" y="472" width="196" height="42" rx="21" fill="#1B2A36" stroke="#324554"/>
+  <text x="277" y="499" fill="#C9D3DC" font-family="Inter, Arial, sans-serif" font-size="14" font-weight="700">Use sample prompt</text>
+  <text x="104" y="554" fill="#8392A0" font-family="Inter, Arial, sans-serif" font-size="14">Finance, Security, Support, and Operations policies</text>
+  <rect x="638" y="156" width="570" height="438" rx="20" fill="#F4F0E6"/>
+  <rect x="670" y="188" width="148" height="34" rx="17" fill="#DDE8DC"/>
+  <text x="696" y="211" fill="#1C5B38" font-family="Inter, Arial, sans-serif" font-size="13" font-weight="800">VERDICT SAFE</text>
+  <text x="670" y="270" fill="#101820" font-family="Inter, Arial, sans-serif" font-size="32" font-weight="800">Refund exceptions require</text>
+  <text x="670" y="310" fill="#101820" font-family="Inter, Arial, sans-serif" font-size="32" font-weight="800">documented approval.</text>
+  <text x="670" y="354" fill="#53606B" font-family="Inter, Arial, sans-serif" font-size="18">The answer is constrained to the retrieved billing policy</text>
+  <text x="670" y="380" fill="#53606B" font-family="Inter, Arial, sans-serif" font-size="18">version and includes the source clauses used.</text>
+  <rect x="670" y="426" width="500" height="1" fill="#D7D1C1"/>
+  <text x="670" y="468" fill="#101820" font-family="Inter, Arial, sans-serif" font-size="14" font-weight="800">SOURCE</text>
+  <text x="750" y="468" fill="#53606B" font-family="Inter, Arial, sans-serif" font-size="14">billing_and_refund_policy_v2.md</text>
+  <text x="670" y="506" fill="#101820" font-family="Inter, Arial, sans-serif" font-size="14" font-weight="800">OWNER</text>
+  <text x="750" y="506" fill="#53606B" font-family="Inter, Arial, sans-serif" font-size="14">Finance</text>
+  <text x="670" y="544" fill="#101820" font-family="Inter, Arial, sans-serif" font-size="14" font-weight="800">GROUNDING</text>
+  <text x="770" y="544" fill="#53606B" font-family="Inter, Arial, sans-serif" font-size="14">No hallucination warning</text>
+</svg>

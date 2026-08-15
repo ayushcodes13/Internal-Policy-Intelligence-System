@@ -1,20 +1,98 @@
+<div align="center">
+
+<img src="docs/assets/canon-logo.svg" alt="CANON logo" width="120" />
+
 # CANON
 
-CANON is a governance-gated policy intelligence system for teams that need internal policy answers with traceable evidence. It routes each question through intent detection, owner scoping, retrieval, governance classification, source-backed generation, and lexical grounding before returning an answer.
+**Policy-governed intelligence for decisions that need proof.**
 
-The current production app is a **Vercel-ready Next.js application**. The older Streamlit/FAISS Python implementation is preserved only as a reference path.
+***Take organizational rules, retrieve the authoritative version, enforce constraints, and only then let AI answer.***
 
-## What It Does
+[![Next.js](https://img.shields.io/badge/Next.js-15-black?style=for-the-badge&logo=nextdotjs)](https://nextjs.org/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+[![Gemini](https://img.shields.io/badge/Gemini-Embeddings-8E75B2?style=for-the-badge&logo=googlegemini&logoColor=white)](https://ai.google.dev/)
+[![Groq](https://img.shields.io/badge/Groq-Inference-F55036?style=for-the-badge)](https://groq.com/)
+[![Vercel](https://img.shields.io/badge/Vercel-Ready-black?style=for-the-badge&logo=vercel)](https://vercel.com/)
+[![Cloudflare](https://img.shields.io/badge/Cloudflare-Workers-F38020?style=for-the-badge&logo=cloudflare&logoColor=white)](https://workers.cloudflare.com/)
 
-- Answers internal policy questions from approved source documents.
-- Routes queries to the correct owner domains before retrieval.
-- Suppresses outdated policy versions through deterministic metadata rules.
-- Refuses unrelated, invalid, or policy-disallowed requests.
-- Escalates security, legal, unauthorized-access, and fraud cases.
-- Returns sources, supporting clauses, confidence, verdict, and grounding warnings.
-- Runs on Vercel without loading local transformer models at request time.
+[Overview](#overview) | [Demo](#demo) | [Architecture](#architecture) | [Run Locally](#run-locally) | [Deployment](#deployment)
 
-## Production Architecture
+</div>
+
+---
+
+<img src="docs/assets/canon-product-preview.svg" alt="CANON product interface preview" width="100%" />
+
+## Overview
+
+CANON is a governance-gated policy intelligence system for teams that need internal policy answers with traceable evidence. It does not treat the model as the source of truth. Instead, it treats approved policy documents as the canonical authority and uses the model only after routing, retrieval, and governance checks have already narrowed the answer space.
+
+The system is designed for organizational policy workflows where a generic chatbot would be risky: refund rules, access controls, support exceptions, security escalation, compliance-sensitive procedures, and versioned operating policies.
+
+The current production app is a **Vercel-ready Next.js application** backed by Groq for classification/generation and Gemini for embeddings. The previous Streamlit, FAISS, and local SentenceTransformers implementation is preserved as a legacy reference path, but it is no longer the production frontend.
+
+CANON can currently answer from the included markdown policy corpus, return sources and supporting clauses, refuse invalid or policy-disallowed requests, and escalate sensitive cases. It is still a project/demo system, not a substitute for legal, compliance, or human policy approval.
+
+## Demo
+
+<img src="docs/assets/canon-workflow.svg" alt="CANON workflow from query to governed answer" width="100%" />
+
+```text
+Question
+  -> intent detection
+  -> owner routing
+  -> Gemini embedding
+  -> policy retrieval
+  -> governance verdict
+  -> source-backed answer or refusal
+```
+
+Example query:
+
+```text
+Can support override the refund deadline?
+```
+
+Example response shape:
+
+```json
+{
+  "status": "SAFE",
+  "verdict": "SAFE",
+  "answer": "The answer is generated only from retrieved policy clauses.",
+  "sources": ["data/raw_docs/policies/billing_and_refund_policy_v2.md"],
+  "supporting_clauses": ["Relevant policy text used by the answer."],
+  "confidence": "high",
+  "context_used": 5,
+  "hallucination_detected": false
+}
+```
+
+## At A Glance
+
+| Area | Current State |
+| --- | --- |
+| Frontend | Next.js App Router, React, TypeScript |
+| API | Next.js route handler at `POST /api/query` |
+| AI Layer | Groq chat completions and Gemini embeddings |
+| Retrieval | Static JSON embedding index with cosine similarity |
+| Data | Markdown policy documents under `data/raw_docs` |
+| Deployment | Vercel-ready, Cloudflare Workers compatible through OpenNext |
+| Status | Portfolio-grade MVP with deterministic governance gates |
+
+## Key Features
+
+- **Policy-first answers:** every answer is grounded in approved internal documents.
+- **Owner-scoped retrieval:** queries are routed to Finance, Operations, Security, or Support before evidence is used.
+- **Version-aware evidence:** latest policy versions win over stale source documents.
+- **Explicit governance verdicts:** responses are classified as `SAFE`, `REFUSE_POLICY`, `REFUSE_INVALID`, or `ESCALATE`.
+- **Source-backed output:** answers include source paths, supporting clauses, confidence, and grounding status.
+- **Serverless-friendly design:** no local transformer model downloads during request runtime.
+- **Legacy preserved:** the Streamlit/Python path remains available for reference and comparison.
+
+## Architecture
+
+<img src="docs/assets/canon-architecture.svg" alt="CANON architecture diagram" width="100%" />
 
 ```text
 Browser
@@ -31,93 +109,49 @@ Browser
   -> JSON response
 ```
 
-See `docs/ARCHITECTURE.md` for the folder-level architecture.
+The architecture is shaped around one rule: the model should not get to answer until the system has decided which policy owner applies, which documents are authoritative, whether the request is allowed, and whether the final answer stays close to the retrieved evidence.
 
-## Why The Architecture Changed
-
-The original app was built with Streamlit, FAISS, and local SentenceTransformers. That worked for a demo, but it was a poor fit for Vercel:
-
-- Streamlit expects a persistent Python app server.
-- `sentence-transformers` loads a local embedding model.
-- the cross-encoder reranker also loads a local model.
-- `faiss-cpu` is a native dependency.
-- serverless functions should not depend on local model warmup for every cold start.
-- local JSONL logging is not durable in a serverless environment.
-
-CANON now keeps the same governance idea but moves heavy embedding work out of the request runtime.
+Read the full architecture notes in [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md).
 
 ## Tech Stack
 
-- **Frontend:** Next.js App Router, React, TypeScript
-- **Hosting target:** Vercel
-- **Generation/classification:** Groq chat completions
-- **Embeddings:** Gemini Embedding API
-- **Retrieval:** cosine similarity over a generated static JSON index
-- **Source documents:** Markdown files under `data/raw_docs`
+| Layer | Tools |
+| --- | --- |
+| UI | Next.js, React, TypeScript, CSS |
+| API | Next.js route handlers |
+| Classification | Groq chat completions |
+| Generation | Groq chat completions |
+| Embeddings | Gemini Embedding API |
+| Retrieval | Static JSON index, cosine similarity |
+| Source Data | Markdown policy documents |
+| Deploy | Vercel, Cloudflare Workers through OpenNext |
 
-## Folder Structure
+## Why This Exists
 
-```text
-app/
-  api/query/route.ts        API route for policy queries
-  layout.tsx                App metadata and document shell
-  page.tsx                  Page controller and section composition
-  globals.css               Product-site styling
+The original version used Streamlit, FAISS, local SentenceTransformers, and a local cross-encoder reranker. That worked for a demo, but it created major hosting friction:
 
-components/
-  hero-section.tsx          Landing hero and product preview
-  product-sections.tsx      Product, workflow, architecture, docs bands
-  query-composer.tsx        Query input
-  result-panel.tsx          Answer, warnings, evidence
-  site-header.tsx           Sticky navigation
-  status-metrics.tsx        Verdict/status metrics
+- Streamlit expects a persistent Python app server.
+- `sentence-transformers` loads a local embedding model.
+- the reranker also loads a local model.
+- `faiss-cpu` is a native dependency.
+- serverless platforms do not handle local model warmup cleanly.
+- local JSONL logging is not durable in serverless environments.
 
-config/
-  product.ts                Product name, copy, domains, sample prompts
+The new version keeps the same governance idea while moving heavyweight embedding work into a build-time index and using hosted model APIs at runtime.
 
-lib/
-  client/query-client.ts    Browser API client
-  gemini.ts                 Gemini embedding client
-  groq.ts                   Groq JSON client
-  pipeline.ts               Intent, routing, governance, generation, grounding
-  retrieval.ts              Static index loading and vector scoring
-  types.ts                  Shared types
+## Run Locally
 
-scripts/
-  build-search-index.mjs    Builds data/search-index.json with Gemini
-
-data/
-  raw_docs/                 Policy, FAQ, SOP, and notes source documents
-  search-index.json         Generated embedding index
-
-docs/
-  ARCHITECTURE.md           Production architecture notes
-```
-
-## Environment Variables
-
-Required:
+Clone the repository:
 
 ```bash
-GROQ_API_KEY=...
-GEMINI_API_KEY=...
+git clone https://github.com/ayushcodes13/Internal-Policy-Intelligence-System.git
+cd Internal-Policy-Intelligence-System
 ```
-
-Optional:
-
-```bash
-GROQ_MODEL=llama-3.3-70b-versatile
-GEMINI_EMBEDDING_MODEL=gemini-embedding-001
-```
-
-Use `.env.example` as the local template.
-
-## Local Development
 
 Install dependencies:
 
 ```bash
-npm install
+pnpm install
 ```
 
 Create a local environment file:
@@ -126,78 +160,117 @@ Create a local environment file:
 cp .env.example .env.local
 ```
 
-Add `GROQ_API_KEY` and `GEMINI_API_KEY`, then build the retrieval index:
+Build the retrieval index:
 
 ```bash
-npm run build:index
+pnpm run build:index
 ```
 
 Start the app:
 
 ```bash
-npm run dev
+pnpm run dev
 ```
 
-Open the local Next.js URL printed by the dev server.
+Then open the local URL printed by Next.js.
 
-## Building The Search Index
+## Environment Variables
 
-`npm run build:index` performs the production ingestion step:
-
-1. Reads markdown files from `data/raw_docs`.
-2. Extracts metadata headers such as owner, source type, and update date.
-3. Splits documents into overlapping chunks.
-4. Applies latest-version metadata.
-5. Calls Gemini with `RETRIEVAL_DOCUMENT`.
-6. Normalizes vectors.
-7. Writes `data/search-index.json`.
-
-The generated index is intentionally simple because the current document universe is small. This avoids FAISS and local transformer dependencies in Vercel runtime.
-
-## Running The Query Pipeline
-
-The frontend calls:
-
-```http
-POST /api/query
-Content-Type: application/json
-
-{
-  "query": "How do I request a refund?"
-}
+```makefile
+GROQ_API_KEY=
+GEMINI_API_KEY=
+GROQ_MODEL=llama-3.3-70b-versatile
+GEMINI_EMBEDDING_MODEL=gemini-embedding-001
 ```
 
-The response includes:
+Never commit real secrets. Keep `.env.local` untracked and configure production secrets directly in the hosting provider.
 
-```json
-{
-  "status": "SAFE",
-  "verdict": "SAFE",
-  "answer": "...",
-  "sources": ["data/raw_docs/policies/billing_and_refund_policy_v2.md"],
-  "supporting_clauses": ["..."],
-  "confidence": "high",
-  "context_used": 5,
-  "hallucination_detected": false
-}
+## Project Structure
+
+```text
+app/
+  api/query/route.ts
+  layout.tsx
+  page.tsx
+  globals.css
+
+components/
+  hero-section.tsx
+  product-sections.tsx
+  query-composer.tsx
+  result-panel.tsx
+  site-header.tsx
+  status-metrics.tsx
+
+config/
+  product.ts
+
+lib/
+  client/query-client.ts
+  gemini.ts
+  groq.ts
+  pipeline.ts
+  retrieval.ts
+  types.ts
+
+scripts/
+  build-search-index.mjs
+
+data/
+  raw_docs/
+  search-index.json
+
+docs/
+  ARCHITECTURE.md
+  DOMAINS.md
+  assets/
 ```
 
-Possible verdicts:
+## Engineering Decisions
 
-- `SAFE`
-- `REFUSE_POLICY`
-- `REFUSE_INVALID`
-- `ESCALATE`
+- **Use hosted embeddings:** Gemini embeddings replace local SentenceTransformers so the app can run on serverless infrastructure.
+- **Keep retrieval simple:** the document set is small, so a static JSON vector index is easier to deploy than FAISS.
+- **Gate before generation:** governance classification happens before answer generation, not after.
+- **Expose uncertainty:** confidence, grounding warnings, context count, and sources are part of the response contract.
+- **Preserve legacy code:** the Streamlit implementation stays in the repo as a reference for the earlier workflow.
 
-## Deploying To Vercel
+## Limitations
 
-Before deploying, make sure `data/search-index.json` exists:
+- The app requires valid Groq and Gemini API keys.
+- The current index is generated from local markdown files, not a live document management system.
+- There is no authentication or role-based access control yet.
+- The grounding check is lexical and lightweight, not a formal proof system.
+- It is a portfolio-grade MVP and still needs security review before real organizational use.
+
+## Roadmap
+
+- Add a persistent document ingestion dashboard.
+- Add authentication and role-aware policy access.
+- Add policy owner approval workflows.
+- Add richer evaluation tests for refusals, escalations, and grounding.
+- Add durable production logging for audit trails.
+- Deploy a public demo on Vercel or Cloudflare Workers.
+- Add a clean free subdomain such as `canon-policy.pages.dev` or `canon-policy.<account>.workers.dev`.
+
+## Screenshots
+
+<img src="docs/assets/canon-product-preview.svg" alt="CANON product screenshot mock" width="100%" />
+
+<img src="docs/assets/canon-workflow.svg" alt="CANON workflow screenshot" width="100%" />
+
+<img src="docs/assets/canon-architecture.svg" alt="CANON architecture screenshot" width="100%" />
+
+## Deployment
+
+### Vercel
+
+Make sure the retrieval index exists:
 
 ```bash
-npm run build:index
+pnpm run build:index
 ```
 
-Then set these Vercel environment variables:
+Set these environment variables in Vercel:
 
 ```bash
 GROQ_API_KEY
@@ -212,75 +285,24 @@ Deploy:
 vercel deploy
 ```
 
-Use `vercel deploy --prod` only when you intentionally want a production deployment.
+### Cloudflare Workers
 
-## Free Domain Plan
+The repo includes OpenNext and Wrangler configuration:
 
-The recommended free deployment hostname is a Cloudflare Workers subdomain:
+```bash
+pnpm run cf:build
+pnpm run cf:preview
+pnpm run cf:deploy
+```
+
+Recommended free hostname:
 
 ```text
 canon-policy.<your-cloudflare-subdomain>.workers.dev
 ```
 
-The repository includes `wrangler.jsonc` and Cloudflare scripts:
+Read [`docs/DOMAINS.md`](docs/DOMAINS.md) for the free domain plan.
 
-```bash
-npm run cf:build
-npm run cf:preview
-npm run cf:deploy
-```
+## License
 
-After a stable deployment exists, a cleaner free alias such as `canon.is-a.dev` can point to the live app. See `docs/DOMAINS.md`.
-
-## Troubleshooting
-
-### `data/search-index.json is missing`
-
-Run:
-
-```bash
-npm run build:index
-```
-
-This requires `GEMINI_API_KEY`.
-
-### `GROQ_API_KEY is not configured`
-
-Set the key locally in `.env.local` or in the Vercel project environment variables.
-
-### `GEMINI_API_KEY is not configured`
-
-Set the key before running `npm run build:index` and before deploying the API route.
-
-### Query returns no sources
-
-Check:
-
-- the detected intent maps to an owner in `lib/pipeline.ts`
-- matching documents have the expected `owner` metadata
-- older versions are not being filtered by `is_latest`
-- the generated index was rebuilt after document changes
-
-## Legacy Python Reference
-
-The previous implementation remains in the repository:
-
-```text
-app.py
-src/
-requirements.txt
-run_app.sh
-data/index/
-```
-
-That path is useful for historical comparison and offline experiments. New production work should target the Next.js app under `app/`, `components/`, `config/`, `lib/`, and `scripts/`.
-
-## Current Status
-
-- Next.js frontend implemented.
-- TypeScript API route implemented.
-- Gemini embedding client implemented.
-- Groq JSON client implemented.
-- Static retrieval index builder implemented.
-- Production build verified.
-- Deployment still requires real `GEMINI_API_KEY` and `GROQ_API_KEY`.
+This project is released under the Apache License 2.0. See [`LICENSE`](LICENSE).
