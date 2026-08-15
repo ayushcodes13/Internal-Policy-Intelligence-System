@@ -24,6 +24,7 @@ lib/
   types.ts                  Shared TypeScript types
 scripts/
   build-search-index.mjs    Build-time document chunking and Gemini embeddings
+wrangler.jsonc              Cloudflare Workers deployment target
 data/
   raw_docs/                 Source policy documents
   search-index.json         Generated retrieval index, not produced without GEMINI_API_KEY

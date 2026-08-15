@@ -214,6 +214,24 @@ vercel deploy
 
 Use `vercel deploy --prod` only when you intentionally want a production deployment.
 
+## Free Domain Plan
+
+The recommended free deployment hostname is a Cloudflare Workers subdomain:
+
+```text
+canon-policy.<your-cloudflare-subdomain>.workers.dev
+```
+
+The repository includes `wrangler.jsonc` and Cloudflare scripts:
+
+```bash
+npm run cf:build
+npm run cf:preview
+npm run cf:deploy
+```
+
+After a stable deployment exists, a cleaner free alias such as `canon.is-a.dev` can point to the live app. See `docs/DOMAINS.md`.
+
 ## Troubleshooting
 
 ### `data/search-index.json is missing`
