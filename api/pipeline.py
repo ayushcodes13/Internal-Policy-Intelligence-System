@@ -11,7 +11,11 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Literal
 
-from dotenv import load_dotenv
+try:
+    from dotenv import load_dotenv
+except ModuleNotFoundError:
+    def load_dotenv(*_args: Any, **_kwargs: Any) -> bool:
+        return False
 
 
 ROOT = Path(__file__).resolve().parents[1]

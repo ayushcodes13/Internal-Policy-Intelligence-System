@@ -10,7 +10,8 @@ from api.pipeline import ROOT, _embed_text, _load_env, _load_raw_chunks
 def main() -> None:
     _load_env()
     if not os.getenv("GEMINI_API_KEY"):
-        raise RuntimeError("GEMINI_API_KEY is required to build data/search-index.json")
+        print("GEMINI_API_KEY is not configured; skipping data/search-index.json generation.")
+        return
 
     chunks = []
     for chunk in _load_raw_chunks():

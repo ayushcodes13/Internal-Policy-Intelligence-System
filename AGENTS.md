@@ -90,7 +90,7 @@ pnpm run build
 pnpm run build:vercel
 ```
 
-`npm run build:index`, `pnpm run build:index`, and `pnpm run build:vercel` require `GEMINI_API_KEY`.
+`npm run build:index`, `pnpm run build:index`, and `pnpm run build:vercel` use `GEMINI_API_KEY` when it is configured. Without the key, index generation is skipped and the API uses lexical fallback retrieval.
 
 ## Deployment
 
@@ -136,4 +136,4 @@ When retrieval docs change:
 pnpm run build:index
 ```
 
-The index build requires a valid `GEMINI_API_KEY`.
+The index build creates semantic embeddings only when `GEMINI_API_KEY` is configured.

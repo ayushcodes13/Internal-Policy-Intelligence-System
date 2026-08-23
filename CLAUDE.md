@@ -49,7 +49,7 @@ pnpm run build
 pnpm run build:vercel
 ```
 
-`pnpm run build:index` and `pnpm run build:vercel` require `GEMINI_API_KEY`.
+`pnpm run build:index` and `pnpm run build:vercel` create semantic embeddings when `GEMINI_API_KEY` is configured. Without the key, index generation is skipped and the API uses lexical fallback retrieval.
 
 ## Handoff Rule
 

@@ -295,7 +295,7 @@ Run the Python API locally:
 python3 -m uvicorn api.main:app --host 0.0.0.0 --port 8000
 ```
 
-On Vercel, set `GROQ_API_KEY` and `GEMINI_API_KEY` before deploying. `VITE_API_BASE_URL` can stay unset for same-origin Vercel deployment because the frontend calls `/api/query`.
+On Vercel, set `GROQ_API_KEY` and `GEMINI_API_KEY` before deploying. `GEMINI_API_KEY` is required to generate the semantic retrieval index; without it, the build skips index generation and the API falls back to lexical retrieval. `VITE_API_BASE_URL` can stay unset for same-origin Vercel deployment because the frontend calls `/api/query`.
 
 ## License
 
