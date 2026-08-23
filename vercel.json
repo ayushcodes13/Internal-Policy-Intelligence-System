@@ -1,7 +1,5 @@
 {
-  "functions": {
-    "app/api/query/route.ts": {
-      "maxDuration": 30
-    }
-  }
+  "installCommand": "pnpm install --frozen-lockfile",
+  "buildCommand": "pnpm run build",
+  "outputDirectory": "dist"
 }

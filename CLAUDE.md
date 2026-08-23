@@ -20,26 +20,19 @@ Work primarily in:
 ```text
 frontend/
 api/
+data/
 docs/
+evaluation/
 ```
 
-The old Python/Streamlit implementation is retained for reference:
-
-```text
-app.py
-src/
-requirements.txt
-run_app.sh
-```
-
-Do not treat the Streamlit app or removed Next.js files as the current production path.
+Do not reintroduce retired app surfaces or deleted prototype backends as the current production path.
 
 ## Key Constraints
 
 - Do not commit API keys.
 - Keep `GROQ_API_KEY` and `GEMINI_API_KEY` as environment variables.
 - Do not reintroduce TypeScript AI backend logic. The AI pipeline belongs in Python.
-- Do not reintroduce runtime `sentence-transformers`, cross-encoder reranking, or `faiss-cpu` into the production path.
+- Do not add local model runtimes or native vector-store dependencies unless the architecture docs are updated with the deployment tradeoff.
 - Preserve the core verdict flow: `SAFE`, `REFUSE_POLICY`, `REFUSE_INVALID`, `ESCALATE`.
 - Preserve source citations, supporting clauses, confidence, and grounding warnings.
 - Keep `frontend/src/lib/product.ts` as the source of truth for product naming and visible product copy.

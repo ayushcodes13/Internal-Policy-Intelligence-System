@@ -38,15 +38,15 @@ Browser
   -> JSON response
 ```
 
-## Legacy Path
-
-The original Streamlit and FAISS implementation remains for reference only:
+## Repository Boundaries
 
 ```text
-app.py
-src/
-run_app.sh
-data/index/
+frontend/             Browser UI and client-side state
+api/                  Python policy intelligence runtime
+data/raw_docs/        Authoritative markdown policy corpus
+data/search-index.json
+docs/                 Human-readable architecture and domain notes
+evaluation/           Offline checks against the current Python pipeline
 ```
 
-Production AI behavior should now go through `api/`, not the old Streamlit app.
+Inactive demo surfaces and binary retrieval artifacts are intentionally not part of the repository. New production behavior should be added to `frontend/`, `api/`, `data/`, `docs/`, or `evaluation/` depending on the ownership boundary.

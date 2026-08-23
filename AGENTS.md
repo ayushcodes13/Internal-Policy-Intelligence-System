@@ -9,22 +9,15 @@ The production app is the Vite/TanStack frontend plus Python API path:
 ```text
 frontend/             React 19, TanStack Router, TanStack Query, Vite
 frontend/src/lib/     Browser-only types, product config, API client
-frontend/src/ui/      shadcn-style local UI components
+frontend/src/components/ui/
+                      shadcn-style local UI components
 api/                  Python API, policy pipeline, Gemini index builder
+data/                 Markdown policy corpus and generated JSON search index
 docs/                 Architecture and deployment documentation
+evaluation/           Offline pipeline checks
 ```
 
-The legacy Streamlit path remains for reference only:
-
-```text
-app.py
-src/
-requirements.txt
-run_app.sh
-data/index/
-```
-
-Do not add new production behavior to `app.py` or the old `src/` Streamlit pipeline unless the task explicitly asks for Streamlit maintenance.
+Do not reintroduce deleted prototype app surfaces or inactive AI backends unless the task explicitly asks for an architecture migration.
 
 ## Product Principles
 

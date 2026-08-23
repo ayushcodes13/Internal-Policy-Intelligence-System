@@ -31,7 +31,7 @@ CANON is a governance-gated policy intelligence system for teams that need inter
 
 The system is designed for organizational policy workflows where a generic chatbot would be risky: refund rules, access controls, support exceptions, security escalation, compliance-sensitive procedures, and versioned operating policies.
 
-The current production path is a **Vite + React 19 + TanStack frontend** calling a **Python API** for policy intelligence. Groq handles classification/generation and Gemini handles embeddings from the Python layer. The previous Streamlit, FAISS, local SentenceTransformers, and Next.js TypeScript API implementations are no longer the production path.
+The current production path is a **Vite + React 19 + TanStack frontend** calling a **Python API** for policy intelligence. Groq handles classification/generation and Gemini handles embeddings from the Python layer. The repository has been cleaned so only the active frontend, Python API, policy corpus, docs, and evaluation tooling remain.
 
 CANON can currently answer from the included markdown policy corpus, return sources and supporting clauses, refuse invalid or policy-disallowed requests, and escalate sensitive cases. It is still a project/demo system, not a substitute for legal, compliance, or human policy approval.
 
@@ -91,7 +91,6 @@ Example response shape:
 - **Explicit governance verdicts:** responses are classified as `SAFE`, `REFUSE_POLICY`, `REFUSE_INVALID`, or `ESCALATE`.
 - **Source-backed output:** answers include source paths, supporting clauses, confidence, and grounding status.
 - **No Node AI backend:** Node is used only for frontend tooling; the intelligence runtime is Python.
-- **Legacy preserved:** the Streamlit path remains available for reference and comparison.
 
 ## Product Surface
 
@@ -145,16 +144,9 @@ Read the full architecture notes in [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.m
 
 ## Why This Exists
 
-The original version used Streamlit, FAISS, local SentenceTransformers, and a local cross-encoder reranker. That worked for a demo, but it created major hosting friction:
+CANON exists because policy Q&A should not behave like an unconstrained chatbot. The system separates the decision path into explicit stages: detect what the user is asking, scope the policy owners, retrieve authoritative documents, apply governance rules, generate only from retrieved evidence, and return an answer with sources.
 
-- Streamlit expects a persistent Python app server.
-- `sentence-transformers` loads a local embedding model.
-- the reranker also loads a local model.
-- `faiss-cpu` is a native dependency.
-- serverless platforms do not handle local model warmup cleanly.
-- local JSONL logging is not durable in serverless environments.
-
-The new version keeps the same governance idea while moving heavyweight embedding work into a build-time index and keeping all AI orchestration in Python.
+The current implementation keeps the browser app light and pushes the intelligence runtime into Python. Embeddings are generated through Gemini, model reasoning runs through Groq, and retrieval uses a static JSON index plus deterministic fallbacks so the project remains understandable and deployable.
 
 ## Run Locally
 
@@ -245,11 +237,11 @@ docs/
 
 - **Use the requested frontend stack:** React 19, TypeScript, TanStack Router, TanStack Query, Vite, Tailwind v4, Radix-style UI, Lucide icons, and Recharts now own the browser app.
 - **Keep AI in Python:** intent detection, retrieval, governance, generation, and grounding are all behind `api/main.py`.
-- **Use hosted embeddings:** Gemini embeddings replace local SentenceTransformers for the production index path.
-- **Keep retrieval simple:** the document set is small, so a static JSON vector index is easier to deploy than FAISS.
+- **Use hosted embeddings:** Gemini embeddings keep the production index path lightweight and deployment-friendly.
+- **Keep retrieval simple:** the document set is small, so a static JSON vector index is easy to build, inspect, and deploy.
 - **Gate before generation:** governance classification happens before answer generation, not after.
 - **Expose uncertainty:** confidence, grounding warnings, context count, and sources are part of the response contract.
-- **Preserve legacy code:** the Streamlit implementation stays in the repo as a reference for the earlier workflow.
+- **Remove inactive surfaces:** retired demo code and unused binary indexes are kept out of the production repository so future work starts from the active architecture.
 
 ## Limitations
 
