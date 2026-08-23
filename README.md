@@ -23,7 +23,7 @@
 
 ---
 
-<img src="docs/assets/canon-home.jpg" alt="CANON homepage showing the policy-governed intelligence interface" width="100%" />
+<img src="docs/assets/canon-home.png" alt="CANON homepage showing the policy-governed intelligence interface" width="100%" />
 
 ## Overview
 
@@ -37,7 +37,7 @@ CANON can currently answer from the included markdown policy corpus, return sour
 
 ## Demo
 
-<img src="docs/assets/canon-console.jpg" alt="CANON live policy console with sample questions and query input" width="100%" />
+<img src="docs/assets/canon-console.png" alt="CANON live policy console with sample questions and query input" width="100%" />
 
 ```text
 Question
@@ -93,9 +93,11 @@ Example response shape:
 - **No Node AI backend:** Node is used only for frontend tooling; the intelligence runtime is Python.
 - **Legacy preserved:** the Streamlit path remains available for reference and comparison.
 
-## Architecture
+## Workflow
 
-<img src="docs/assets/canon-architecture-section.jpg" alt="CANON architecture section showing governance features and system metrics" width="100%" />
+<img src="docs/assets/canon-workflow.png" alt="CANON workflow section showing the evidence-gated policy pipeline" width="100%" />
+
+## Architecture
 
 ```text
 Browser
@@ -264,11 +266,11 @@ docs/
 
 ## Screenshots
 
-<img src="docs/assets/canon-home.jpg" alt="CANON live homepage screenshot" width="100%" />
+<img src="docs/assets/canon-home.png" alt="CANON live homepage screenshot" width="100%" />
 
-<img src="docs/assets/canon-console.jpg" alt="CANON live console screenshot" width="100%" />
+<img src="docs/assets/canon-console.png" alt="CANON live console screenshot" width="100%" />
 
-<img src="docs/assets/canon-architecture-section.jpg" alt="CANON live architecture screenshot" width="100%" />
+<img src="docs/assets/canon-workflow.png" alt="CANON live workflow screenshot" width="100%" />
 
 ## Deployment
 
