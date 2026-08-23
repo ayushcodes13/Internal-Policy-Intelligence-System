@@ -17,7 +17,9 @@
 [![Gemini](https://img.shields.io/badge/Gemini-Embeddings-8E75B2?style=for-the-badge&logo=googlegemini&logoColor=white)](https://ai.google.dev/)
 [![Groq](https://img.shields.io/badge/Groq-Inference-F55036?style=for-the-badge)](https://groq.com/)
 
-[Overview](#overview) | [Demo](#demo) | [Architecture](#architecture) | [Run Locally](#run-locally) | [Deployment](#deployment)
+[Live Demo](https://canon.devayushrout.me) | [Overview](#overview) | [Demo](#demo) | [Architecture](#architecture) | [Run Locally](#run-locally) | [Deployment](#deployment)
+
+**Deployed CANON:** [`canon.devayushrout.me`](https://canon.devayushrout.me)
 
 </div>
 
@@ -36,6 +38,8 @@ The current production path is a **Vite + React 19 + TanStack frontend** calling
 CANON can currently answer from the included markdown policy corpus, return sources and supporting clauses, refuse invalid or policy-disallowed requests, and escalate sensitive cases. It is still a project/demo system, not a substitute for legal, compliance, or human policy approval.
 
 ## Demo
+
+Live production demo: [`canon.devayushrout.me`](https://canon.devayushrout.me)
 
 <img src="docs/assets/canon-console.png" alt="CANON live policy console with sample questions and query input" width="100%" />
 
@@ -80,7 +84,7 @@ Example response shape:
 | AI Layer | Python calls Groq chat completions and Gemini embeddings |
 | Retrieval | Python retrieval over static JSON embeddings, with lexical local fallback |
 | Data | Markdown policy documents under `data/raw_docs` |
-| Deployment | Single Vercel project: static frontend plus Python API function |
+| Deployment | Vercel production at [`canon.devayushrout.me`](https://canon.devayushrout.me) |
 | Status | Portfolio-grade MVP with deterministic governance gates |
 
 ## Key Features
@@ -260,7 +264,7 @@ docs/
 - Add policy owner approval workflows.
 - Add richer evaluation tests for refusals, escalations, and grounding.
 - Add durable production logging for audit trails.
-- Deploy the public Vercel demo with same-origin API routes.
+- Keep the public Vercel demo and custom domain current with releases.
 - Add a clean free subdomain such as `canon-policy.pages.dev` or `canon.is-a.dev`.
 
 ## Screenshots
@@ -274,6 +278,12 @@ docs/
 <img src="docs/assets/canon-architecture.jpg" alt="CANON live architecture screenshot" width="100%" />
 
 ## Deployment
+
+Live production deployment:
+
+```text
+https://canon.devayushrout.me
+```
 
 CANON is configured for a single Vercel project. Vercel builds the Vite frontend, generates the Gemini embedding index during deployment, and routes `/api/*` to the Python FastAPI app through `api/index.py`.
 
