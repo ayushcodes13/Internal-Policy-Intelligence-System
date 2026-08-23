@@ -1,13 +1,69 @@
-import { Bar, BarChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { ArrowUpRight, BrainCircuit, FileCheck2, GitBranch, Github, LockKeyhole, Server, ShieldCheck } from "lucide-react";
 import { QueryConsole } from "../sections/query-console";
 import { Button } from "../components/ui/button";
 import { productConfig } from "../lib/product";
 
-const metricData = [
-  { label: "Verdicts", value: 4 },
-  { label: "Domains", value: 4 },
-  { label: "Node AI", value: 0 }
+const decisionTrace = [
+  {
+    label: "Intent",
+    value: "refund_query",
+    body: "Groq classifies what the user is asking before retrieval starts."
+  },
+  {
+    label: "Owner",
+    value: "Finance",
+    body: "The router narrows the answer space to the policy owner that controls the rule."
+  },
+  {
+    label: "Evidence",
+    value: "v2 policy",
+    body: "Gemini embeddings retrieve approved markdown chunks from the static search index."
+  },
+  {
+    label: "Verdict",
+    value: "SAFE",
+    body: "The governance gate decides safe, refuse, invalid, or escalate before generation."
+  }
+];
+
+const architectureFlow = [
+  {
+    title: "Query intake",
+    detail: "React sends the policy question to the Python FastAPI endpoint at POST /api/query.",
+    icon: BrainCircuit
+  },
+  {
+    title: "Intent and owner routing",
+    detail: "Groq classifies intent while deterministic routing scopes the request to Finance, Operations, Security, or Support.",
+    icon: GitBranch
+  },
+  {
+    title: "Embedding retrieval",
+    detail: "Gemini embeds the query and searches the prebuilt JSON index created from markdown policy documents.",
+    icon: FileCheck2
+  },
+  {
+    title: "Canonical version filter",
+    detail: "The pipeline prefers the newest approved policy version, so stale documents do not override current rules.",
+    icon: LockKeyhole
+  },
+  {
+    title: "Governance verdict",
+    detail: "The system returns SAFE, REFUSE_POLICY, REFUSE_INVALID, or ESCALATE before answer generation is allowed.",
+    icon: ShieldCheck
+  },
+  {
+    title: "Grounded response",
+    detail: "The final answer includes sources, supporting clauses, confidence, context count, and grounding status.",
+    icon: Server
+  }
+];
+
+const controlPoints = [
+  ["Source of truth", "Only approved files in data/raw_docs become retrievable evidence."],
+  ["Version priority", "Current policy versions beat older matches during retrieval and ranking."],
+  ["Refusal path", "Invalid or disallowed requests are stopped before the model writes an answer."],
+  ["Audit payload", "Every response exposes verdict, sources, clauses, confidence, and grounding."]
 ];
 
 const footerColumns = [
@@ -124,31 +180,54 @@ answer.format = {
 
       <section id="product" className="mx-auto w-[min(1120px,calc(100%-32px))] scroll-mt-28 py-20">
         <p className="eyebrow">Product</p>
-        <h2 className="section-title">One policy brain with two clean surfaces.</h2>
+        <h2 className="section-title">A policy engine that decides before it answers.</h2>
         <div className="mt-8 grid grid-cols-2 gap-5 max-lg:grid-cols-1">
           <article className="card motion-rise p-5">
-            <pre className="rounded-2xl border border-[var(--line)] bg-white p-5 font-mono text-sm leading-7">{`const response = await fetch("/api/query", {
-  method: "POST",
-  body: JSON.stringify({
-    query: "Can support override a refund deadline?"
-  })
-});`}</pre>
-            <h3 className="mt-5 text-xl font-black">React policy console</h3>
-            <p className="mt-2 text-[var(--muted)]">TanStack Query owns request state, retries, loading, and error display.</p>
+            <div className="rounded-2xl border border-[var(--line)] bg-white p-5">
+              <p className="text-xs font-black uppercase text-[var(--muted)]">Decision trace</p>
+              <div className="mt-4 grid gap-3">
+                {decisionTrace.map((item, index) => (
+                  <div className="grid grid-cols-[44px_minmax(0,1fr)] gap-3 rounded-2xl border border-[var(--line)] bg-[var(--soft)] p-3" key={item.label}>
+                    <span className="grid h-10 w-10 place-items-center rounded-xl bg-white font-mono text-xs font-black text-violet-700">{String(index + 1).padStart(2, "0")}</span>
+                    <div>
+                      <div className="flex flex-wrap items-center gap-2">
+                        <strong>{item.label}</strong>
+                        <span className="rounded-full bg-white px-2 py-1 font-mono text-xs text-[var(--muted)]">{item.value}</span>
+                      </div>
+                      <p className="mt-1 text-sm leading-6 text-[var(--muted)]">{item.body}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <h3 className="mt-5 text-xl font-black">Readable execution path</h3>
+            <p className="mt-2 text-[var(--muted)]">Each answer can be debugged by following the intent, owner, evidence, verdict, and final grounded response.</p>
           </article>
           <article className="card motion-rise motion-delay-1 p-5">
-            <div className="rounded-2xl border border-[var(--line)] bg-white p-5">
-              <ResponsiveContainer width="100%" height={180}>
-                <BarChart data={metricData}>
-                  <XAxis dataKey="label" tickLine={false} axisLine={false} />
-                  <YAxis hide />
-                  <Tooltip cursor={{ fill: "rgba(27,27,24,0.04)" }} />
-                  <Bar dataKey="value" radius={[8, 8, 0, 0]} fill="#1b1b18" />
-                </BarChart>
-              </ResponsiveContainer>
+            <div className="grid rounded-2xl border border-[var(--line)] bg-white p-5">
+              <p className="text-xs font-black uppercase text-[var(--muted)]">Response contract</p>
+              <div className="mt-4 grid grid-cols-2 gap-3">
+                {[
+                  ["status", "SAFE"],
+                  ["owner", "finance"],
+                  ["source", "billing_policy_v2.md"],
+                  ["grounding", "passed"]
+                ].map(([label, value]) => (
+                  <div className="rounded-2xl bg-[var(--soft)] p-4" key={label}>
+                    <span className="block text-xs font-black uppercase text-[var(--muted)]">{label}</span>
+                    <strong className="mt-2 block break-words font-mono text-sm">{value}</strong>
+                  </div>
+                ))}
+              </div>
+              <pre className="mt-4 overflow-auto rounded-2xl bg-[var(--ink)] p-5 font-mono text-xs leading-6 text-white">{`{
+  "sources": [...],
+  "supporting_clauses": [...],
+  "confidence": "medium",
+  "hallucination_detected": false
+}`}</pre>
             </div>
-            <h3 className="mt-5 text-xl font-black">Audit-ready signals</h3>
-            <p className="mt-2 text-[var(--muted)]">Recharts visualizes verdict, domain, and runtime signals without adding backend complexity.</p>
+            <h3 className="mt-5 text-xl font-black">Audit-ready output</h3>
+            <p className="mt-2 text-[var(--muted)]">The API returns the evidence and governance metadata needed to inspect why an answer was allowed, refused, or escalated.</p>
           </article>
         </div>
       </section>
@@ -179,22 +258,47 @@ answer.format = {
 
       <section id="architecture" className="mx-auto w-[min(1120px,calc(100%-32px))] scroll-mt-28 py-20">
         <p className="eyebrow">Architecture</p>
-        <h2 className="section-title">Vite frontend. Python intelligence runtime.</h2>
-        <div className="mt-8 grid grid-cols-3 gap-5 max-lg:grid-cols-1">
-          {productConfig.features.map((feature) => (
-            <article className="card p-6" key={feature.title}>
-              <h3 className="text-xl font-black">{feature.title}</h3>
-              <p className="mt-3 leading-7 text-[var(--muted)]">{feature.body}</p>
-            </article>
-          ))}
+        <h2 className="section-title">Inside the governed answer path.</h2>
+        <p className="mt-4 max-w-3xl text-lg leading-8 text-[var(--muted)]">
+          The codebase is organized around a policy pipeline, not a generic chatbot loop. A response is only produced after routing, retrieval, versioning, governance, and grounding checks finish.
+        </p>
+        <div className="mt-8 grid grid-cols-3 gap-4 max-lg:grid-cols-2 max-sm:grid-cols-1">
+          {architectureFlow.map((stage, index) => {
+            const Icon = stage.icon;
+
+            return (
+              <article className="card p-5" key={stage.title}>
+                <div className="flex items-center justify-between gap-4">
+                  <span className="grid h-11 w-11 place-items-center rounded-2xl bg-white font-mono text-sm font-black text-violet-700">{String(index + 1).padStart(2, "0")}</span>
+                  <Icon className="h-5 w-5 text-[var(--muted)]" />
+                </div>
+                <h3 className="mt-5 text-xl font-black">{stage.title}</h3>
+                <p className="mt-3 leading-7 text-[var(--muted)]">{stage.detail}</p>
+              </article>
+            );
+          })}
         </div>
-        <div className="mt-5 grid grid-cols-3 gap-4 rounded-3xl bg-[var(--ink)] p-5 text-white max-md:grid-cols-1">
-          {productConfig.stats.map((stat) => (
-            <div className="rounded-2xl bg-white/10 p-5" key={stat.label}>
-              <strong className="block text-4xl">{stat.value}</strong>
-              <span className="text-white/75">{stat.label}</span>
+        <div className="mt-5 rounded-3xl bg-[var(--ink)] p-5 text-white">
+          <div className="grid grid-cols-[0.9fr_1.1fr] gap-6 max-lg:grid-cols-1">
+            <div>
+              <p className="text-xs font-black uppercase text-[#d8c58a]">Control layer</p>
+              <h3 className="mt-3 max-w-md text-3xl font-black leading-tight">The model is downstream from policy authority.</h3>
+              <p className="mt-3 leading-7 text-white/65">
+                CANON first decides what rules apply and whether the request is allowed. The LLM only writes after the retrieved evidence and verdict are available.
+              </p>
             </div>
-          ))}
+            <div className="grid grid-cols-2 gap-3 max-sm:grid-cols-1">
+              {controlPoints.map(([label, detail]) => (
+                <div className="rounded-2xl bg-white/10 p-4" key={label}>
+                  <strong className="block">{label}</strong>
+                  <span className="mt-2 block text-sm leading-6 text-white/65">{detail}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+          <pre className="mt-5 overflow-auto rounded-2xl bg-black/25 p-5 font-mono text-xs leading-6 text-white/75">{`query -> intent -> owner scope -> Gemini vector search
+      -> newest approved policy -> verdict gate
+      -> grounded answer/refusal/escalation JSON`}</pre>
         </div>
       </section>
 

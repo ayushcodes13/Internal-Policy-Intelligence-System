@@ -93,11 +93,17 @@ Example response shape:
 - **No Node AI backend:** Node is used only for frontend tooling; the intelligence runtime is Python.
 - **Legacy preserved:** the Streamlit path remains available for reference and comparison.
 
+## Product Surface
+
+<img src="docs/assets/canon-product.jpg" alt="CANON product section showing the decision trace and response contract" width="100%" />
+
 ## Workflow
 
 <img src="docs/assets/canon-workflow.png" alt="CANON workflow section showing the evidence-gated policy pipeline" width="100%" />
 
 ## Architecture
+
+<img src="docs/assets/canon-architecture.jpg" alt="CANON architecture section showing the internal governed answer path" width="100%" />
 
 ```text
 Browser
@@ -271,6 +277,8 @@ docs/
 <img src="docs/assets/canon-console.png" alt="CANON live console screenshot" width="100%" />
 
 <img src="docs/assets/canon-workflow.png" alt="CANON live workflow screenshot" width="100%" />
+
+<img src="docs/assets/canon-architecture.jpg" alt="CANON live architecture screenshot" width="100%" />
 
 ## Deployment
 
