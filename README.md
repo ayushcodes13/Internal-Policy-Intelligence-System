@@ -80,7 +80,7 @@ Example response shape:
 | AI Layer | Python calls Groq chat completions and Gemini embeddings |
 | Retrieval | Python retrieval over static JSON embeddings, with lexical local fallback |
 | Data | Markdown policy documents under `data/raw_docs` |
-| Deployment | Static frontend plus Python API service |
+| Deployment | Single Vercel project: static frontend plus Python API function |
 | Status | Portfolio-grade MVP with deterministic governance gates |
 
 ## Key Features
@@ -140,7 +140,7 @@ Read the full architecture notes in [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.m
 | Embeddings | Python calling Gemini Embedding API |
 | Retrieval | Python static JSON index, cosine similarity, lexical fallback |
 | Source Data | Markdown policy documents |
-| Deploy | Static frontend plus Python API host |
+| Deploy | Vercel static frontend plus Python serverless function |
 
 ## Why This Exists
 
@@ -153,8 +153,8 @@ The current implementation keeps the browser app light and pushes the intelligen
 Clone the repository:
 
 ```bash
-git clone https://github.com/ayushcodes13/Internal-Policy-Intelligence-System.git
-cd Internal-Policy-Intelligence-System
+git clone https://github.com/ayushcodes13/canon.git
+cd canon
 ```
 
 Install dependencies:
@@ -219,6 +219,7 @@ frontend/
     styles.css
 
 api/
+  index.py
   main.py
   pipeline.py
   build_search_index.py
@@ -259,7 +260,7 @@ docs/
 - Add policy owner approval workflows.
 - Add richer evaluation tests for refusals, escalations, and grounding.
 - Add durable production logging for audit trails.
-- Deploy a public static frontend and Python API demo.
+- Deploy the public Vercel demo with same-origin API routes.
 - Add a clean free subdomain such as `canon-policy.pages.dev` or `canon.is-a.dev`.
 
 ## Screenshots
@@ -274,25 +275,27 @@ docs/
 
 ## Deployment
 
-Build the static frontend:
+CANON is configured for a single Vercel project. Vercel builds the Vite frontend, generates the Gemini embedding index during deployment, and routes `/api/*` to the Python FastAPI app through `api/index.py`.
+
+For local frontend-only verification:
 
 ```bash
 pnpm run build
 ```
 
-Build the optional embedding index:
+For Vercel production builds:
 
 ```bash
-pnpm run build:index
+pnpm run build:vercel
 ```
 
-Run the Python API wherever Python services are hosted:
+Run the Python API locally:
 
 ```bash
 python3 -m uvicorn api.main:app --host 0.0.0.0 --port 8000
 ```
 
-Set `VITE_API_BASE_URL` when the frontend and Python API are deployed on different origins.
+On Vercel, set `GROQ_API_KEY` and `GEMINI_API_KEY` before deploying. `VITE_API_BASE_URL` can stay unset for same-origin Vercel deployment because the frontend calls `/api/query`.
 
 ## License
 

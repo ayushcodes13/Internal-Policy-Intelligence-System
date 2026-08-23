@@ -53,6 +53,7 @@ Key files:
 - `frontend/src/screens/home.tsx` owns the main UI.
 - `frontend/src/sections/query-console.tsx` owns the live query console.
 - `frontend/src/lib/api.ts` calls the Python API.
+- `api/index.py` exposes the FastAPI app to Vercel Python Functions.
 - `api/main.py` validates request input and returns pipeline output.
 - `api/pipeline.py` owns intent detection, routing, constraints, governance, generation, and grounding orchestration.
 - `api/build_search_index.py` generates the static embedding index.
@@ -86,13 +87,14 @@ pnpm run build:index
 pnpm run dev:api
 pnpm run dev
 pnpm run build
+pnpm run build:vercel
 ```
 
-`npm run build:index` or `pnpm run build:index` requires `GEMINI_API_KEY`.
+`npm run build:index`, `pnpm run build:index`, and `pnpm run build:vercel` require `GEMINI_API_KEY`.
 
 ## Deployment
 
-Deploy the `dist/` static frontend and host `api.main:app` on a Python service. Set `VITE_API_BASE_URL` when the frontend and backend are on different origins.
+Deploy as one Vercel project. The frontend is emitted to `dist/`, and `/api/*` rewrites to `api/index.py`, which imports `api.main:app`. Keep `VITE_API_BASE_URL` unset for this same-origin deployment.
 
 ## Frontend Guidelines
 

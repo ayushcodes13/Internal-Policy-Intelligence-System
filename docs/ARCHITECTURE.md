@@ -12,6 +12,7 @@ frontend/
   src/components/ui/        shadcn-style local UI components
   src/lib/                  Browser-only API client, product copy, types
 api/
+  index.py                  Vercel Python function entrypoint
   main.py                   FastAPI app and /api/query route
   pipeline.py               Python AI orchestration
   build_search_index.py     Gemini-powered index builder
@@ -50,3 +51,16 @@ evaluation/           Offline checks against the current Python pipeline
 ```
 
 Inactive demo surfaces and binary retrieval artifacts are intentionally not part of the repository. New production behavior should be added to `frontend/`, `api/`, `data/`, `docs/`, or `evaluation/` depending on the ownership boundary.
+
+## Vercel Deployment
+
+```text
+Vercel
+  -> pnpm run build:vercel
+  -> api/build_search_index.py creates data/search-index.json with Gemini
+  -> vite build emits dist/
+  -> /api/* rewrites to api/index.py
+  -> api.main:app serves FastAPI routes
+```
+
+Keep `VITE_API_BASE_URL` unset for the same-origin Vercel deployment. The browser client will call `/api/query` on the deployed domain.

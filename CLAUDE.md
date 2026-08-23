@@ -46,9 +46,10 @@ pnpm run build:index
 pnpm run dev:api
 pnpm run dev
 pnpm run build
+pnpm run build:vercel
 ```
 
-`pnpm run build:index` requires `GEMINI_API_KEY`.
+`pnpm run build:index` and `pnpm run build:vercel` require `GEMINI_API_KEY`.
 
 ## Handoff Rule
 
