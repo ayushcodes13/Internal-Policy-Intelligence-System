@@ -22,7 +22,7 @@ export function QueryConsole() {
 
   return (
     <section id="console" className="mx-auto w-[min(1120px,calc(100%-32px))] py-20">
-      <div className="max-w-3xl">
+      <div className="motion-rise max-w-3xl">
         <p className="eyebrow">Live Console</p>
         <h2 className="section-title">Run the governed retrieval flow.</h2>
         <p className="mt-4 text-lg leading-8 text-[var(--muted)]">
@@ -32,12 +32,12 @@ export function QueryConsole() {
       </div>
 
       <div className="mt-8 grid grid-cols-[300px_minmax(0,1fr)] gap-5 max-lg:grid-cols-1">
-        <aside className="card self-start p-4">
+        <aside className="card motion-rise self-start p-4">
           <p className="mb-3 text-xs font-black uppercase text-[var(--muted)]">Samples</p>
           <div className="grid gap-2">
             {productConfig.sampleQueries.map((sample) => (
               <button
-                className="rounded-2xl bg-white p-4 text-left leading-6 hover:ring-2 hover:ring-[var(--ink)]"
+                className="rounded-2xl bg-white p-4 text-left leading-6 transition hover:-translate-y-0.5 hover:ring-2 hover:ring-[var(--ink)]"
                 key={sample}
                 type="button"
                 onClick={() => {
@@ -53,7 +53,7 @@ export function QueryConsole() {
 
         <section className="min-w-0">
           <form
-            className="card mb-4 p-4"
+            className="card motion-rise motion-delay-1 mb-4 p-4"
             onSubmit={(event) => {
               event.preventDefault();
               submit();
@@ -94,12 +94,19 @@ function ResultPanel({
   loading: boolean;
 }) {
   if (loading) {
-    return <div className="result-zone grid place-items-center text-[var(--muted)]">Running Python governance pipeline...</div>;
+    return (
+      <div className="result-zone motion-fade grid place-items-center text-[var(--muted)]">
+        <span className="inline-flex items-center gap-3">
+          <span className="status-pulse h-2.5 w-2.5 rounded-full bg-emerald-500" />
+          Running Python governance pipeline...
+        </span>
+      </div>
+    );
   }
 
   if (error) {
     return (
-      <div className="result-zone border-rose-300 bg-rose-50">
+      <div className="result-zone motion-fade border-rose-300 bg-rose-50">
         <h3 className="text-xl font-black text-rose-900">Request failed</h3>
         <p className="mt-2 text-rose-800">{error}</p>
       </div>
@@ -108,7 +115,7 @@ function ResultPanel({
 
   if (!result) {
     return (
-      <div className="result-zone grid place-items-center text-center text-[var(--muted)]">
+      <div className="result-zone motion-fade grid place-items-center text-center text-[var(--muted)]">
         <div>
           <h3 className="text-xl font-black text-[var(--ink)]">Ready</h3>
           <p className="mt-2">Submit a policy question to run the governance pipeline.</p>
@@ -118,7 +125,7 @@ function ResultPanel({
   }
 
   return (
-    <div className="result-zone">
+    <div className="result-zone motion-fade">
       <div className="grid grid-cols-4 gap-3 max-md:grid-cols-2">
         {[
           ["Status", result.status],
@@ -126,7 +133,7 @@ function ResultPanel({
           ["Confidence", result.confidence],
           ["Context", String(result.context_used)]
         ].map(([label, value]) => (
-          <div className="rounded-2xl border border-[var(--line)] bg-[var(--soft)] p-4" key={label}>
+          <div className="motion-rise rounded-2xl border border-[var(--line)] bg-[var(--soft)] p-4" key={label}>
             <span className="block text-xs font-black uppercase text-[var(--muted)]">{label}</span>
             <strong className="mt-2 block break-words">{value}</strong>
           </div>

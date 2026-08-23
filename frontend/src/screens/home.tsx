@@ -13,7 +13,7 @@ const metricData = [
 export function HomePage() {
   return (
     <main className="min-h-screen bg-[var(--bg)] text-[var(--ink)]">
-      <header className="sticky top-3 z-30 mx-auto grid w-[min(1120px,calc(100%-32px))] grid-cols-[1fr_auto_1fr] items-center rounded-2xl border border-[var(--line)] bg-white/90 p-2 shadow-lg shadow-black/5 backdrop-blur max-md:grid-cols-[1fr_auto]">
+      <header className="motion-fade sticky top-3 z-30 mx-auto grid w-[min(1120px,calc(100%-32px))] grid-cols-[1fr_auto_1fr] items-center rounded-2xl border border-[var(--line)] bg-white/90 p-2 shadow-lg shadow-black/5 backdrop-blur max-md:grid-cols-[1fr_auto]">
         <a className="flex items-center gap-3 font-black" href="#top" aria-label="CANON home">
           <span className="grid h-11 w-11 place-items-center rounded-2xl border border-[#d8c58a]/50 bg-[#0b0f14] shadow-md">
             <img src="/canon-logo.svg" alt="" className="h-9 w-9 rounded-xl" />
@@ -37,18 +37,18 @@ export function HomePage() {
 
       <section id="top" className="mx-auto flex w-[min(1120px,calc(100%-32px))] scroll-mt-28 flex-col items-center gap-7 py-12">
         <div className="flex max-w-5xl flex-col items-center text-center">
-          <div className="inline-flex items-center gap-3 rounded-full border border-[var(--line)] bg-[var(--soft)] px-3 py-2 text-sm font-bold text-[var(--muted)]">
+          <div className="motion-rise inline-flex items-center gap-3 rounded-full border border-[var(--line)] bg-[var(--soft)] px-3 py-2 text-sm font-bold text-[var(--muted)]">
             <img src="/canon-logo.svg" alt="" className="h-6 w-6 rounded-lg" />
-            <span className="rounded-full bg-emerald-100 px-2 py-1 text-xs uppercase text-emerald-700">New</span>
+            <span className="status-pulse rounded-full bg-emerald-100 px-2 py-1 text-xs uppercase text-emerald-700">New</span>
             Python AI backend with a TanStack frontend
           </div>
-          <h1 className="mt-5 max-w-5xl text-7xl font-black leading-[0.95] tracking-normal text-balance max-lg:text-6xl max-sm:text-5xl">
+          <h1 className="motion-rise motion-delay-1 mt-5 max-w-5xl text-7xl font-black leading-[0.95] tracking-normal text-balance max-lg:text-6xl max-sm:text-5xl">
             {productConfig.tagline}
           </h1>
-          <p className="mt-5 max-w-3xl text-xl leading-8 text-[var(--muted)]">
+          <p className="motion-rise motion-delay-2 mt-5 max-w-3xl text-xl leading-8 text-[var(--muted)]">
             {productConfig.description}
           </p>
-          <div className="mt-7 flex flex-wrap justify-center gap-3">
+          <div className="motion-rise motion-delay-3 mt-7 flex flex-wrap justify-center gap-3">
             <Button asChild size="lg">
               <a href="#console">Run a policy query</a>
             </Button>
@@ -56,7 +56,7 @@ export function HomePage() {
               <a href="#architecture">View architecture</a>
             </Button>
           </div>
-          <div className="mt-6 flex flex-wrap justify-center gap-2">
+          <div className="motion-rise motion-delay-4 mt-6 flex flex-wrap justify-center gap-2">
             {productConfig.heroChips.map((chip) => (
               <span className="rounded-full border border-[var(--line)] bg-white px-4 py-2 text-sm font-medium text-[var(--muted)]" key={chip}>
                 {chip}
@@ -64,7 +64,7 @@ export function HomePage() {
             ))}
           </div>
         </div>
-        <div className="w-full max-w-4xl rounded-3xl border border-[var(--line)] bg-white shadow-xl shadow-black/10">
+        <div className="motion-rise motion-delay-4 terminal-preview w-full max-w-4xl rounded-3xl border border-[var(--line)] bg-white shadow-xl shadow-black/10">
           <div className="flex items-center gap-2 border-b border-[var(--line)] px-5 py-4">
             <span className="h-3 w-3 rounded-full bg-rose-500" />
             <span className="h-3 w-3 rounded-full bg-amber-500" />
@@ -86,7 +86,7 @@ answer.format = {
         </div>
       </section>
 
-      <section className="mx-auto grid w-[min(1120px,calc(100%-32px))] grid-cols-[1.4fr_repeat(3,auto)] gap-4 border-y border-[var(--line)] py-5 text-sm text-[var(--muted)] max-lg:grid-cols-1">
+      <section className="motion-rise mx-auto grid w-[min(1120px,calc(100%-32px))] grid-cols-[1.4fr_repeat(3,auto)] gap-4 border-y border-[var(--line)] py-5 text-sm text-[var(--muted)] max-lg:grid-cols-1">
         <strong className="text-[var(--ink)]">Built for teams that cannot afford guesswork</strong>
         <span>Python AI pipeline</span>
         <span>TanStack frontend</span>
@@ -99,7 +99,7 @@ answer.format = {
         <p className="eyebrow">Product</p>
         <h2 className="section-title">One policy brain with two clean surfaces.</h2>
         <div className="mt-8 grid grid-cols-2 gap-5 max-lg:grid-cols-1">
-          <article className="card p-5">
+          <article className="card motion-rise p-5">
             <pre className="rounded-2xl border border-[var(--line)] bg-white p-5 font-mono text-sm leading-7">{`const response = await fetch("/api/query", {
   method: "POST",
   body: JSON.stringify({
@@ -109,7 +109,7 @@ answer.format = {
             <h3 className="mt-5 text-xl font-black">React policy console</h3>
             <p className="mt-2 text-[var(--muted)]">TanStack Query owns request state, retries, loading, and error display.</p>
           </article>
-          <article className="card p-5">
+          <article className="card motion-rise motion-delay-1 p-5">
             <div className="rounded-2xl border border-[var(--line)] bg-white p-5">
               <ResponsiveContainer width="100%" height={180}>
                 <BarChart data={metricData}>
@@ -141,7 +141,7 @@ answer.format = {
             ["Resolve verdict", ShieldCheck],
             ["Ground answer", FileCheck2]
           ].map(([step, Icon], index) => (
-            <div className="card flex items-center gap-4 p-4" key={String(step)}>
+            <div className="card motion-rise flex items-center gap-4 p-4" key={String(step)}>
               <span className="grid h-12 w-12 place-items-center rounded-2xl bg-white font-mono text-sm text-violet-700">{String(index + 1).padStart(2, "0")}</span>
               <Icon className="h-5 w-5 text-[var(--muted)]" />
               <strong>{String(step)}</strong>
