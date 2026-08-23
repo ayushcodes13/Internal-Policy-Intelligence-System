@@ -21,7 +21,7 @@ export function QueryConsole() {
   }
 
   return (
-    <section id="console" className="mx-auto w-[min(1120px,calc(100%-32px))] py-20">
+    <section id="console" className="mx-auto w-[min(1120px,calc(100%-32px))] scroll-mt-28 py-20">
       <div className="motion-rise max-w-3xl">
         <p className="eyebrow">Live Console</p>
         <h2 className="section-title">Run the governed retrieval flow.</h2>

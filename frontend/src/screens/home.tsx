@@ -95,7 +95,7 @@ answer.format = {
 
       <QueryConsole />
 
-      <section id="product" className="mx-auto w-[min(1120px,calc(100%-32px))] py-20">
+      <section id="product" className="mx-auto w-[min(1120px,calc(100%-32px))] scroll-mt-28 py-20">
         <p className="eyebrow">Product</p>
         <h2 className="section-title">One policy brain with two clean surfaces.</h2>
         <div className="mt-8 grid grid-cols-2 gap-5 max-lg:grid-cols-1">
@@ -126,7 +126,7 @@ answer.format = {
         </div>
       </section>
 
-      <section id="workflow" className="mx-auto grid w-[min(1120px,calc(100%-32px))] grid-cols-[0.9fr_1.1fr] gap-10 py-20 max-lg:grid-cols-1">
+      <section id="workflow" className="mx-auto grid w-[min(1120px,calc(100%-32px))] scroll-mt-28 grid-cols-[0.9fr_1.1fr] gap-10 py-20 max-lg:grid-cols-1">
         <div>
           <p className="eyebrow">Workflow</p>
           <h2 className="section-title">Ask anything. Answer only when the evidence is good.</h2>
@@ -150,7 +150,7 @@ answer.format = {
         </div>
       </section>
 
-      <section id="architecture" className="mx-auto w-[min(1120px,calc(100%-32px))] py-20">
+      <section id="architecture" className="mx-auto w-[min(1120px,calc(100%-32px))] scroll-mt-28 py-20">
         <p className="eyebrow">Architecture</p>
         <h2 className="section-title">Vite frontend. Python intelligence runtime.</h2>
         <div className="mt-8 grid grid-cols-3 gap-5 max-lg:grid-cols-1">
@@ -170,6 +170,21 @@ answer.format = {
           ))}
         </div>
       </section>
+
+      <footer id="docs" className="mx-auto mb-48 w-[min(1120px,calc(100%-32px))] scroll-mt-28 border-t border-[var(--line)] py-16">
+        <div className="flex flex-wrap items-center justify-between gap-6">
+          <div className="flex items-center gap-3">
+            <img src="/canon-logo.svg" alt="" className="h-10 w-10 rounded-2xl shadow-md" />
+            <div>
+              <strong className="block">{productConfig.name}</strong>
+              <span className="text-sm text-[var(--muted)]">Policy-governed intelligence with source-backed answers.</span>
+            </div>
+          </div>
+          <a className="rounded-full border border-[var(--line)] px-4 py-2 text-sm font-black hover:border-[var(--ink)]" href="https://github.com/ayushcodes13/canon">
+            GitHub docs
+          </a>
+        </div>
+      </footer>
     </main>
   );
 }
