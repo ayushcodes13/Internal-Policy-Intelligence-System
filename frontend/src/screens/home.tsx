@@ -1,5 +1,5 @@
 import { Bar, BarChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
-import { BrainCircuit, FileCheck2, GitBranch, LockKeyhole, ShieldCheck } from "lucide-react";
+import { ArrowUpRight, BrainCircuit, FileCheck2, GitBranch, Github, LockKeyhole, Server, ShieldCheck } from "lucide-react";
 import { QueryConsole } from "../sections/query-console";
 import { Button } from "../components/ui/button";
 import { productConfig } from "../lib/product";
@@ -8,6 +8,33 @@ const metricData = [
   { label: "Verdicts", value: 4 },
   { label: "Domains", value: 4 },
   { label: "Node AI", value: 0 }
+];
+
+const footerColumns = [
+  {
+    title: "Product",
+    links: [
+      ["Live console", "#console"],
+      ["Workflow", "#workflow"],
+      ["Architecture", "#architecture"]
+    ]
+  },
+  {
+    title: "AI Runtime",
+    links: [
+      ["Python API", "#architecture"],
+      ["Gemini embeddings", "#architecture"],
+      ["Groq inference", "#architecture"]
+    ]
+  },
+  {
+    title: "Project",
+    links: [
+      ["README", "https://github.com/ayushcodes13/canon#readme"],
+      ["Source code", "https://github.com/ayushcodes13/canon"],
+      ["Run locally", "https://github.com/ayushcodes13/canon#run-locally"]
+    ]
+  }
 ];
 
 export function HomePage() {
@@ -171,18 +198,75 @@ answer.format = {
         </div>
       </section>
 
-      <footer id="docs" className="mx-auto mb-48 w-[min(1120px,calc(100%-32px))] scroll-mt-28 border-t border-[var(--line)] py-16">
-        <div className="flex flex-wrap items-center justify-between gap-6">
-          <div className="flex items-center gap-3">
-            <img src="/canon-logo.svg" alt="" className="h-10 w-10 rounded-2xl shadow-md" />
+      <footer id="docs" className="mt-10 scroll-mt-28 bg-[var(--ink)] text-white">
+        <div className="mx-auto w-[min(1120px,calc(100%-32px))] py-16">
+          <div className="grid grid-cols-[1.25fr_0.9fr_1.1fr] gap-8 max-lg:grid-cols-1">
             <div>
-              <strong className="block">{productConfig.name}</strong>
-              <span className="text-sm text-[var(--muted)]">Policy-governed intelligence with source-backed answers.</span>
+              <div className="flex items-center gap-3">
+                <span className="grid h-12 w-12 place-items-center rounded-2xl border border-[#d8c58a]/60 bg-[#0b0f14] shadow-lg shadow-black/20">
+                  <img src="/canon-logo.svg" alt="" className="h-10 w-10 rounded-xl" />
+                </span>
+                <div>
+                  <strong className="block text-xl">{productConfig.name}</strong>
+                  <span className="text-sm font-bold text-white/55">Policy-governed intelligence</span>
+                </div>
+              </div>
+              <p className="mt-5 max-w-md text-base leading-7 text-white/65">
+                CANON routes policy questions through ownership, retrieval, governance, and grounding before any model response is allowed back to the user.
+              </p>
+              <div className="mt-6 flex flex-wrap gap-2">
+                {["SAFE", "REFUSE", "ESCALATE", "GROUNDED"].map((item) => (
+                  <span className="rounded-full border border-white/10 bg-white/8 px-3 py-1 text-xs font-black text-white/70" key={item}>
+                    {item}
+                  </span>
+                ))}
+              </div>
+            </div>
+
+            <div className="rounded-3xl border border-white/10 bg-white/[0.04] p-5">
+              <p className="text-xs font-black uppercase text-[#d8c58a]">System Path</p>
+              <div className="mt-4 grid gap-3 text-sm text-white/70">
+                {[
+                  ["Query", BrainCircuit],
+                  ["Policy owner", GitBranch],
+                  ["Evidence", FileCheck2],
+                  ["Verdict", ShieldCheck],
+                  ["Python API", Server]
+                ].map(([label, Icon]) => (
+                  <div className="flex items-center gap-3" key={String(label)}>
+                    <Icon className="h-4 w-4 text-[#d8c58a]" />
+                    <span>{String(label)}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="grid grid-cols-3 gap-6 max-sm:grid-cols-1">
+              {footerColumns.map((column) => (
+                <div key={column.title}>
+                  <h3 className="text-sm font-black uppercase text-white/45">{column.title}</h3>
+                  <ul className="mt-4 grid gap-3 text-sm font-bold text-white/75">
+                    {column.links.map(([label, href]) => (
+                      <li key={label}>
+                        <a className="inline-flex items-center gap-1.5 hover:text-white" href={href}>
+                          {label}
+                          {href.startsWith("http") ? <ArrowUpRight className="h-3.5 w-3.5" /> : null}
+                        </a>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ))}
             </div>
           </div>
-          <a className="rounded-full border border-[var(--line)] px-4 py-2 text-sm font-black hover:border-[var(--ink)]" href="https://github.com/ayushcodes13/canon">
-            GitHub docs
-          </a>
+
+          <div className="mt-12 flex flex-wrap items-center justify-between gap-4 border-t border-white/10 pt-6 text-sm text-white/50">
+            <span>Built for source-backed policy decisions.</span>
+            <a className="inline-flex items-center gap-2 rounded-full border border-white/10 px-4 py-2 font-black text-white hover:bg-white/10" href="https://github.com/ayushcodes13/canon">
+              <Github className="h-4 w-4" />
+              ayushcodes13/canon
+            </a>
+          </div>
         </div>
       </footer>
     </main>
