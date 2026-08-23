@@ -9,6 +9,7 @@
 ***Take organizational rules, retrieve the authoritative version, enforce constraints, and only then let AI answer.***
 
 [![React](https://img.shields.io/badge/React-19-149ECA?style=for-the-badge&logo=react&logoColor=white)](https://react.dev/)
+[![Live Demo](https://img.shields.io/badge/LIVE-canon.devayushrout.me-16A34A?style=for-the-badge&logo=vercel&logoColor=white)](https://canon.devayushrout.me)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 [![TanStack](https://img.shields.io/badge/TanStack-Router%20%2B%20Query-FF4154?style=for-the-badge)](https://tanstack.com/)
 [![Vite](https://img.shields.io/badge/Vite-7-646CFF?style=for-the-badge&logo=vite&logoColor=white)](https://vite.dev/)
