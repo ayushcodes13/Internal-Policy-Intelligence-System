@@ -1,5 +1,5 @@
 import { useMutation } from "@tanstack/react-query";
-import { Loader2, SendHorizontal } from "lucide-react";
+import { FileText, Loader2, Quote, SendHorizontal } from "lucide-react";
 import { useState } from "react";
 import { fetchPolicyQuery } from "../lib/api";
 import { productConfig } from "../lib/product";
@@ -140,29 +140,70 @@ function ResultPanel({
         ))}
       </div>
 
-      <article className="mt-4 rounded-2xl border border-[var(--line)] bg-white p-5">
+      <article className="mt-4 min-w-0 rounded-2xl border border-[var(--line)] bg-white p-5">
         <h3 className="text-lg font-black">Response</h3>
-        <p className="mt-3 whitespace-pre-wrap leading-7 text-[var(--muted)]">
+        <p className="mt-3 whitespace-pre-wrap break-words leading-7 text-[var(--muted)]">
           {result.answer || result.message || "No answer returned."}
         </p>
       </article>
 
       <div className="mt-4 grid grid-cols-2 gap-4 max-lg:grid-cols-1">
-        <article className="rounded-2xl border border-[var(--line)] bg-white p-5">
+        <article className="min-w-0 rounded-2xl border border-[var(--line)] bg-white p-5">
           <h3 className="text-lg font-black">Sources</h3>
-          <ul className="mt-3 list-disc pl-5 text-sm leading-7 text-[var(--muted)]">
-            {result.sources.length ? result.sources.map((source) => <li key={source}>{source}</li>) : <li>No cited source.</li>}
-          </ul>
+          <div className="mt-3 grid gap-2">
+            {result.sources.length ? (
+              result.sources.map((source) => <SourceRow key={source} source={source} />)
+            ) : (
+              <EmptyResultLine>No cited source.</EmptyResultLine>
+            )}
+          </div>
         </article>
-        <article className="rounded-2xl border border-[var(--line)] bg-white p-5">
+        <article className="min-w-0 rounded-2xl border border-[var(--line)] bg-white p-5">
           <h3 className="text-lg font-black">Supporting clauses</h3>
-          <ul className="mt-3 list-disc pl-5 text-sm leading-7 text-[var(--muted)]">
-            {result.supporting_clauses.length
-              ? result.supporting_clauses.map((clause) => <li key={clause}>{clause}</li>)
-              : <li>No supporting clauses returned.</li>}
-          </ul>
+          <div className="mt-3 grid gap-2">
+            {result.supporting_clauses.length ? (
+              result.supporting_clauses.map((clause) => <ClauseRow key={clause} clause={clause} />)
+            ) : (
+              <EmptyResultLine>No supporting clauses returned.</EmptyResultLine>
+            )}
+          </div>
         </article>
       </div>
     </div>
+  );
+}
+
+function SourceRow({ source }: { source: string }) {
+  const label = source.split("/").at(-1) || source;
+
+  return (
+    <div className="min-w-0 rounded-xl border border-[var(--line)] bg-[var(--soft)] p-3">
+      <div className="flex min-w-0 items-start gap-2.5">
+        <FileText className="mt-0.5 h-4 w-4 shrink-0 text-[var(--muted)]" />
+        <div className="min-w-0">
+          <p className="break-words text-sm font-black leading-5 text-[var(--ink)]">{label}</p>
+          <p className="mt-1 break-all font-mono text-[11px] leading-5 text-[var(--muted)]">{source}</p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function ClauseRow({ clause }: { clause: string }) {
+  return (
+    <div className="min-w-0 rounded-xl border border-[var(--line)] bg-[var(--soft)] p-3">
+      <div className="flex min-w-0 items-start gap-2.5">
+        <Quote className="mt-1 h-4 w-4 shrink-0 text-[var(--muted)]" />
+        <p className="min-w-0 whitespace-pre-wrap break-words text-sm leading-6 text-[var(--muted)]">{clause}</p>
+      </div>
+    </div>
+  );
+}
+
+function EmptyResultLine({ children }: { children: React.ReactNode }) {
+  return (
+    <p className="rounded-xl border border-dashed border-[var(--line)] bg-[var(--soft)] p-3 text-sm leading-6 text-[var(--muted)]">
+      {children}
+    </p>
   );
 }
