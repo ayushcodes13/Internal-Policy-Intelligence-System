@@ -7,6 +7,14 @@
     ]
   },
   {
+    "query": "how to get a refund?",
+    "expected_verdict": "SAFE",
+    "expected_sources": [
+      "data/raw_docs/policies/billing_and_refund_policy_v2.md",
+      "data/raw_docs/sops/refund_handling_sop.md"
+    ]
+  },
+  {
     "query": "Can I request a refund after 10 days of purchase?",
     "expected_verdict": "REFUSE_POLICY",
     "expected_sources": [

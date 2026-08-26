@@ -259,6 +259,12 @@ def _dot(a: list[float], b: list[float]) -> float:
     return sum(left * right for left, right in zip(a, b))
 
 
+def _is_note_chunk(chunk: Chunk) -> bool:
+    source_type = str(chunk.metadata.get("source_type", "")).lower()
+    path = str(chunk.metadata.get("path", "")).lower()
+    return source_type in {"note", "notes"} or "/notes/" in path
+
+
 def detect_intents(user_query: str) -> list[str]:
     if os.getenv("GROQ_API_KEY"):
         try:
@@ -285,13 +291,13 @@ def detect_intents(user_query: str) -> list[str]:
 
     text = user_query.lower()
     intents: list[str] = []
-    if any(word in text for word in ["refund", "cancel", "billing", "invoice", "payment"]):
+    if any(word in text for word in ["refund", "cancel", "billing", "invoice", "payment", "charge", "charged"]):
         intents.append("refund_query" if "refund" in text or "cancel" in text else "billing_query")
-    if any(word in text for word in ["access", "permission", "login", "role"]):
+    if any(word in text for word in ["access", "permission", "login", "role", "verification", "verify", "documents"]):
         intents.append("access_request")
-    if any(word in text for word in ["close", "closure", "terminate"]):
+    if any(word in text for word in ["close", "closure", "terminate", "termination", "suspended", "violate", "violation", "terms of service"]):
         intents.append("account_closure")
-    if any(word in text for word in ["hacked", "fraud", "security", "unauthorized", "incident"]):
+    if any(word in text for word in ["hacked", "fraud", "security", "unauthorized", "incident", "without permission"]):
         intents.append("security_policy_query")
     if any(word in text for word in ["support", "sla", "ticket"]):
         intents.append("support_process_query")
@@ -314,7 +320,7 @@ def retrieve_chunks(user_query: str, allowed_owners: list[str], top_k: int = 5) 
         for chunk in _load_index()
         if chunk.metadata.get("owner") in allowed_owners
         and chunk.metadata.get("is_latest") is not False
-        and chunk.metadata.get("source_type") != "notes"
+        and not _is_note_chunk(chunk)
     ]
 
     if not chunks:
@@ -338,6 +344,14 @@ def retrieve_chunks(user_query: str, allowed_owners: list[str], top_k: int = 5) 
         chunk_words = _keywords(chunk.text)
         overlap = len(query_words & chunk_words)
         score = overlap / max(1, len(query_words))
+        path = str(chunk.metadata.get("path", ""))
+        source_type = str(chunk.metadata.get("source_type", ""))
+        if source_type == "policy":
+            score += 0.2
+        elif source_type == "sop":
+            score += 0.15
+        if "refund" in query_words and "refund" in path:
+            score += 0.1
         if score > 0:
             scored.append(Chunk(**{**chunk.__dict__, "score": score}))
     scored.sort(key=lambda chunk: chunk.score, reverse=True)
@@ -348,7 +362,7 @@ def apply_constraints(chunks: list[Chunk], allowed_owners: list[str]) -> list[Ch
     seen: set[str] = set()
     cleaned: list[Chunk] = []
     for chunk in chunks:
-        if chunk.metadata.get("source_type") == "notes":
+        if _is_note_chunk(chunk):
             continue
         if chunk.metadata.get("owner") not in allowed_owners:
             continue
@@ -361,11 +375,26 @@ def apply_constraints(chunks: list[Chunk], allowed_owners: list[str]) -> list[Ch
 
 def evaluate_governance(user_query: str, chunks: list[Chunk]) -> Verdict:
     text = user_query.lower()
-    if len(_keywords(text)) < 2:
-        return "REFUSE_INVALID"
-    if any(word in text for word in ["hacked", "fraud", "unauthorized access", "legal action"]):
+    refund_after_days = re.search(r"\bafter\s+(\d+)\s+days?\b", text)
+    if any(phrase in text for phrase in ["hacked", "fraud", "unauthorized", "without permission", "legal action", "charged twice", "double charged"]):
         return "ESCALATE"
-    if any(phrase in text for phrase in ["bypass", "fake", "ignore policy", "override without approval"]):
+    if any(
+        phrase in text
+        for phrase in [
+            "bypass",
+            "fake",
+            "ignore policy",
+            "override",
+            "outside the allowed window",
+            "another user's data",
+            "all user payment data",
+            "refund all charges",
+        ]
+    ):
+        return "REFUSE_POLICY"
+    if "refund" in text and refund_after_days and int(refund_after_days.group(1)) > 7:
+        return "REFUSE_POLICY"
+    if "refund" in text and any(phrase in text for phrase in ["policy violation", "terms of service violation", "account termination"]):
         return "REFUSE_POLICY"
     if not chunks:
         return "REFUSE_INVALID"
@@ -376,6 +405,38 @@ def _context(chunks: list[Chunk]) -> str:
     return "\n\n---\n\n".join(
         f"Document: {chunk.metadata.get('path')}\n{chunk.text}" for chunk in chunks[:5]
     )
+
+
+def _best_evidence_sentence(user_query: str, chunks: list[Chunk]) -> tuple[Chunk, str]:
+    query_words = _keywords(user_query)
+    refund_request_query = "refund" in query_words and any(
+        token in user_query.lower() for token in ["how", "get", "request", "apply", "submit"]
+    )
+    best_chunk = chunks[0]
+    best_sentence = re.split(r"(?<=[.!?])\s+", best_chunk.text.strip())[0]
+    best_score = -1.0
+
+    for chunk in chunks[:5]:
+        candidates = [
+            candidate.strip(" -")
+            for candidate in re.split(r"(?<=[.!?])\s+|\n+", chunk.text)
+            if candidate.strip(" -")
+        ]
+        for sentence in candidates:
+            sentence_words = _keywords(sentence)
+            score = len(query_words & sentence_words)
+            if refund_request_query:
+                score += sum(
+                    1
+                    for token in ["request", "submitted", "support", "channels", "intake"]
+                    if token in sentence.lower()
+                )
+            if score > best_score:
+                best_chunk = chunk
+                best_sentence = sentence
+                best_score = score
+
+    return best_chunk, best_sentence
 
 
 def generate_answer(user_query: str, chunks: list[Chunk]) -> dict[str, Any]:
@@ -420,8 +481,7 @@ def generate_answer(user_query: str, chunks: list[Chunk]) -> dict[str, Any]:
         except Exception:
             pass
 
-    best = top_chunks[0]
-    first_sentence = re.split(r"(?<=[.!?])\s+", best.text.strip())[0]
+    best, first_sentence = _best_evidence_sentence(user_query, top_chunks)
     return {
         "status": "SAFE",
         "answer": f"Based on the retrieved policy evidence: {first_sentence}",
